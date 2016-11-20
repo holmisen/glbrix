@@ -27,6 +27,9 @@ data Placed a = Placed !Placement !(Maybe Color) !a
 lplacement :: Lens' (Placed a) Placement
 lplacement = lens (\(Placed p _ _) -> p) (\(Placed _ c a) p -> Placed p c a)
 
+lplacedValue :: Lens' (Placed a) a
+lplacedValue = lens (\(Placed _ _ a) -> a) (\(Placed p c _) a -> Placed p c a)
+
 data Tree a = Part a
             | Group [Tree a]
   deriving (Foldable, Functor, Show, Traversable)
@@ -37,6 +40,10 @@ groupTrees = Group
 ungroupTree :: Tree a -> [Tree a]
 ungroupTree (Group ns) = ns
 ungroupTree n          = [n]
+
+flattenPartTree :: Tree a -> [a]
+flattenPartTree (Part a) = [a]
+flattenPartTree (Group ts) = concatMap flattenPartTree ts
 
 --------------------------------------------------------------------------------
 

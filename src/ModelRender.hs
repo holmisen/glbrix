@@ -13,15 +13,19 @@ import Types
 renderModel :: [PlacedPart] -> IO ()
 renderModel = traverse_ (renderPart renderColor)
 
-renderModelUniqColors =
-   traverse_ (\(color, part) -> renderPart (const $ GL.color color) part) . zip [zero ..]
+type Renderer a = (Color -> IO ()) -> a -> IO ()
+
+renderWithUniqColors :: Renderer a -> [a] -> IO ()
+renderWithUniqColors render =
+   traverse_ (\(color, part) -> render (const $ GL.color color) part) . zip [zero ..]
    where
       zero = toEnum 0 :: Color3 GLubyte
 
 
-renderPart :: (Color -> IO ()) -> PlacedPart -> IO ()
+renderPart :: Renderer PlacedPart
 renderPart cf = traverse_ (renderPlaced cf)
 
+renderPlaced :: Renderer (Placed Prim)
 renderPlaced renderColor (Placed p c a) =
    GL.preservingMatrix $ do
       renderPlacement p

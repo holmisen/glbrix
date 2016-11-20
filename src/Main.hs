@@ -11,6 +11,8 @@ import App
 import Camera
 import Model
 import ModelRender
+import Primitive (Prim)
+import Types
 import qualified Primitive
 
 
@@ -103,19 +105,41 @@ handleMouse :: App -> MouseCallback
 handleMouse app LeftButton Down pos = do
   applyCamera =<< get (_appCamera app)
   parts <- get (_appModel app)
-  pickPlacedPart parts pos
+  pickPlacedPart pos parts
   return ()
 
 handleMouse _ _ _ _ =
   return ()
 
 
-pickPlacedPart :: [PlacedPart] -> Position -> IO (Maybe Int)
-pickPlacedPart parts pos = do
+-- | Return the index of the placed part under given position, or
+-- Nothing if there is no part under position.
+pickPlacedPart :: Position -> [PlacedPart] -> IO (Maybe Int)
+pickPlacedPart = pickPart renderPart
+
+-- | Return the z position of the top of the part under given position
+-- or 0 if there is no part under position.
+pickPlacedPrim :: Position -> [PlacedPart] -> IO Double
+pickPlacedPrim pos parts = do
+   let prims = concatMap flattenPartTree parts
+   index <- pickPart renderPlaced pos prims
+   case index of
+      Nothing -> return 0
+      Just i  ->
+         let
+            placed   = prims !! i
+            P3 _ _ z = placed ^. (lplacement.lposition)
+            prim     = placed ^. lplacedValue
+         in
+            return $ fromIntegral z + Primitive.height prim
+
+
+pickPart :: Renderer a -> Position -> [a] -> IO (Maybe Int)
+pickPart renderer pos parts = do
   GL.clearColor $= Color4 1 1 1 (1 :: GLfloat)
   GL.clear [GL.ColorBuffer, GL.DepthBuffer]
 
-  renderModelUniqColors parts
+  renderWithUniqColors renderer parts
   GL.flush
 
   color <- getColorAtPosition pos
