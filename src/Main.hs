@@ -9,6 +9,7 @@ import Foreign.Ptr           (Ptr)
 
 import App
 import Camera
+import Model
 import ModelRender
 import qualified Primitive
 
@@ -100,29 +101,30 @@ display app = do
 
 handleMouse :: App -> MouseCallback
 handleMouse app LeftButton Down pos = do
-  GL.clearColor $= Color4 1 1 1 (1 :: GLfloat)
-  GL.clear [GL.ColorBuffer, GL.DepthBuffer]
-
   applyCamera =<< get (_appCamera app)
-
-  model <- get (_appModel app)
-  renderModelUniqColors model
-
-  GL.flush
-  [r,g,b,a] <- getColorAtPosition pos
-
-  let partIndex = fromEnum (Color3 r g b)
-
-  putStrLn $ show pos ++ "\t" ++ show [r,g,b,a] ++ "\t (part " ++ show partIndex ++ ")"
-
-  GLUT.postRedisplay Nothing
+  parts <- get (_appModel app)
+  pickPlacedPart parts pos
+  return ()
 
 handleMouse _ _ _ _ =
   return ()
 
 
+pickPlacedPart :: [PlacedPart] -> Position -> IO (Maybe Int)
+pickPlacedPart parts pos = do
+  GL.clearColor $= Color4 1 1 1 (1 :: GLfloat)
+  GL.clear [GL.ColorBuffer, GL.DepthBuffer]
 
-getColorAtPosition :: Position -> IO [GLubyte]
+  renderModelUniqColors parts
+  GL.flush
+
+  color <- getColorAtPosition pos
+  let partIndex = if color < maxBound then Just (fromEnum $ looseAlpha color) else Nothing
+  putStrLn $ show pos ++ "\t" ++ show color ++ "\t (part " ++ show partIndex ++ ")"
+  return partIndex
+
+
+getColorAtPosition :: Position -> IO (Color4 GLubyte)
 getColorAtPosition pos@(Position posX posY) = do
   -- glFlush()
   -- glFinish()
@@ -137,12 +139,12 @@ getColorAtPosition pos@(Position posX posY) = do
 
   ptr <- mallocArray 4 :: IO (Ptr GLubyte)
   GL.readPixels flippedPos (Size 1 1) (PixelData RGBA UnsignedByte ptr)
-  arr <- peekArray 4 ptr
+  [r,g,b,a] <- peekArray 4 ptr
 
   -- TODO: force arr before freeing?
   Ptr.free ptr
 
-  return arr
+  return (Color4 r g b a)
 
 --------------------------------------------------------------------------------
 
