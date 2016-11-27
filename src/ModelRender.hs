@@ -8,6 +8,7 @@ import Graphics.Rendering.OpenGL.GL.VertexArrays (Capability(..))
 import Model
 import Primitive
 import Types
+import qualified GLColor
 
 --------------------------------------------------------------------------------
 
@@ -15,7 +16,7 @@ renderModel :: [PlacedPart] -> IO ()
 renderModel parts = do
    -- Render part wireframe in constant color
    GL.polygonMode $= (GL.Line, GL.Line)
-   traverse_ (renderPart $ const $ GL.color $ Color3 0.1 0.1 (0.1 :: GLfloat)) parts
+   traverse_ (renderPart $ const $ GL.color $ Color3 0.2 0.2 (0.2 :: GLfloat)) parts
 
    -- Render part polygons
    GL.polygonMode $= (GL.Fill, GL.Fill)
@@ -56,13 +57,12 @@ renderRotation (Rotation r) = GL.rotate (90 * fromIntegral r) (vector3f 0 0 1)
 renderColor :: Color -> IO ()
 renderColor = GL.color . go
    where
-      c r g b = Color3 r g b :: Color3 GLfloat
-      go Red    = c 1 0 0
-      go Green  = c 0 0.8 0
-      go Blue   = c 0 0 1
-      go Yellow = c 1 1 0
-      go White  = c 0.8 0.8 0.8
-      go Black  = c 0.2 0.2 0.2
+      go Red    = GLColor.red
+      go Green  = GLColor.green
+      go Blue   = GLColor.blue
+      go Yellow = GLColor.yellow
+      go White  = GLColor.white
+      go Black  = GLColor.black
 
 --------------------------------------------------------------------------------
 
