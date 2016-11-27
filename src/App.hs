@@ -41,7 +41,7 @@ newDefaultApp = do
 
 --------------------------------------------------------------------------------
 
-startPlate = part (Plate 20 20) (P3 0 0 0) noRotation (Just Types.Green)
+startPlate = part (Plate 20 20) (P3 (-10) (-10) 0) noRotation (Just Types.Green)
 
 startBrick = part (Brick 2 2) (P3 0 0 1) noRotation (Just Types.Red)
 
