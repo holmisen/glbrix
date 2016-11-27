@@ -80,7 +80,7 @@ reshape app (Size w h) = do
 
 --  GL.ortho (-w2) w2 (-h2) h2 1 500
 
-  GL.frustum (-w2) w2 (-h2) h2 20 70
+  GL.frustum (-w2) w2 (-h2) h2 20 80
 
   GL.matrixMode $= Modelview 0
 
@@ -94,9 +94,6 @@ display app = do
   applyCamera =<< get (_appCamera app)
 
 --  GL.currentColor $= Color3 1 0 0
-
-  -- Enable this to draw wireframe:
---  GL.polygonMode $= (GL.Line, GL.Line)
 
   renderAxis 2
   GL.cullFace $= Just (GL.Back)
