@@ -3,6 +3,7 @@
 module App where
 
 import Camera
+import Command
 import Editor
 import Model
 import Primitive
@@ -24,6 +25,7 @@ data App =
   { _appCamera     :: IORef Camera
   , _appProjection :: ProjectionType
   , _appEditor     :: IORef Editor
+  , _appCurrentColor :: IORef Types.Color
   }
 
 makeLenses ''App
@@ -33,10 +35,12 @@ newDefaultApp :: IO App
 newDefaultApp = do
    cam <- newIORef defaultCamera
    editor <- newIORef $ startEditor
+   color <- newIORef $ Types.Red
    return App
       { _appCamera = cam
       , _appProjection = Ortho
       , _appEditor = editor
+      , _appCurrentColor = color
       }
 
 --------------------------------------------------------------------------------
@@ -48,3 +52,16 @@ startBrick = part (Brick 2 2) (P3 0 0 1) noRotation (Just Types.Red)
 startEditor = Editor.Place [startBrick] [startPlate]
 
 --------------------------------------------------------------------------------
+
+execCommand :: App -> Command -> IO ()
+execCommand app cmd = do
+   color <- get (_appCurrentColor app)
+   case cmd of
+      CmdPlate l w ->
+         let plate = part (Plate l w) (P3 0 0 0) noRotation (Just color)
+         in _appEditor app $~ Editor.placeParts [plate]
+      CmdBrick l w ->
+         let brick = part (Brick l w) (P3 0 0 0) noRotation (Just color)
+         in _appEditor app $~ Editor.placeParts [brick]
+      CmdColor c ->
+         _appCurrentColor app $= c
