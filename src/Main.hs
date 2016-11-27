@@ -9,6 +9,7 @@ import Foreign.Ptr           (Ptr)
 
 import App
 import Camera
+import Editor
 import GLUtils
 import Model
 import ModelRender
@@ -99,19 +100,31 @@ display app = do
 
   renderAxis 2
   GL.cullFace $= Just (GL.Back)
-  renderModel =<< get (_appModel app)
+  renderModel =<< (Editor.placedParts <$> get (_appEditor app))
 
   GLUT.swapBuffers
 
 
 handleMouse :: App -> MouseCallback
-handleMouse app LeftButton Down pos = do
+handleMouse app LeftButton Down mousePos = do
   applyCamera =<< get (_appCamera app)
-  parts <- get (_appModel app)
-  pickPlacedPart pos parts
---  flippedPos <- GLUtils.flipPosition pos
-  logInfo =<< ((\z -> "position: " ++ show z) <$> GLUtils.getModelPosition pos)
-  return ()
+
+  editor <- get (_appEditor app)
+
+  -- TODO: Handle other modes
+  let Place toPlace placedParts = editor
+
+  pickPlacedPart mousePos placedParts
+
+  modelPos <- GLUtils.getModelPosition mousePos
+
+  logInfo $ "position: " ++ show modelPos
+
+  let newlyPlaced = map (Model.placePartAt $ modelPos) toPlace
+
+  _appEditor app $= Place [App.startBrick] (newlyPlaced ++ placedParts)
+
+  GLUT.postRedisplay Nothing
 
 handleMouse _ _ _ _ =
   return ()
