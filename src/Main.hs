@@ -68,6 +68,9 @@ main = do
                  GLUT.postRedisplay Nothing
      )
 
+  GLUT.passiveMotionCallback $= Just (handleMouseMove app)
+
+
   -- When keys are pressed, their characters are accumulated into
   -- commands than can be executed.
   GLUT.keyboardCallback $=
@@ -126,9 +129,16 @@ display app = do
 
 --  GL.currentColor $= Color3 1 0 0
 
-  renderAxis 2
   GL.cullFace $= Just (GL.Back)
-  renderModel =<< (Editor.placedParts <$> get (_appEditor app))
+
+  editor <- get (_appEditor app)
+
+  renderAxis 2
+  renderModel $ Editor.placedParts editor
+
+  case editor of
+     Place toPlace _ -> renderModelWireframe toPlace
+     _               -> return ()
 
   GLUT.swapBuffers
 
@@ -142,20 +152,34 @@ handleMouse app LeftButton Down mousePos = do
   -- TODO: Handle other modes
   let Place toPlace placedParts = editor
 
-  pickPlacedPart mousePos placedParts
+--  pickPlacedPart mousePos placedParts
 
-  modelPos <- GLUtils.getModelPosition mousePos
+--  modelPos <- GLUtils.getModelPosition mousePos
 
-  logInfo $ "position: " ++ show modelPos
+--  logInfo $ "position: " ++ show modelPos
 
-  let newlyPlaced = map (Model.placePartAt $ modelPos) toPlace
+--  let newlyPlaced = map (Model.placePartAt $ modelPos) toPlace
 
-  _appEditor app $= Place toPlace (newlyPlaced ++ placedParts)
+  _appEditor app $= Place toPlace (toPlace ++ placedParts)
 
   GLUT.postRedisplay Nothing
 
 handleMouse _ _ _ _ =
   return ()
+
+
+handleMouseMove :: App -> MotionCallback
+handleMouseMove app mousePos = do
+   modelPos <- GLUtils.getModelPosition mousePos
+   logInfo $ "Pos: " ++ show modelPos
+   editor <- get (_appEditor app)
+   case editor of
+      Place toPlace placedParts -> do
+         let toPlace' = map (Model.placePartAt modelPos) toPlace
+         _appEditor app $= Place toPlace' placedParts
+         GLUT.postRedisplay Nothing
+      _other ->
+         return ()
 
 
 -- | Return the index of the placed part under given position, or
