@@ -1,3 +1,4 @@
+import Control.Monad
 import Data.IORef
 import Data.StateVar
 import Graphics.Rendering.OpenGL as GL
@@ -37,26 +38,34 @@ main = do
 
   GLUT.displayCallback $= display app
 
-  mousePos <- newIORef (undefined :: Position)
+  mousePos <- newIORef Nothing
   camRef   <- newIORef (undefined :: Camera)
   keysRef  <- newIORef []
 
   GLUT.mouseCallback $=
      (Just $ \ btn keyState p -> do
-           mousePos $=! p
-           (camRef   $=!) =<< get (_appCamera app)
+           when (btn == RightButton) $
+              case keyState of
+                 Down -> do
+                    mousePos $=! Just p
+                    (camRef $=!) =<< get (_appCamera app)
+                 Up ->
+                    mousePos $=! Nothing
            handleMouse app btn keyState p)
 
   GLUT.motionCallback $=
      (Just $ \(Position x y) -> do
-           Position x' y' <- get mousePos
-           cam <- get camRef
-           let dx = fromIntegral (x - x')
-           let dy = fromIntegral (y - y')
-           let newCam = ((camElevation %~ \e -> e - dy) .
-                         (camAzimuth   %~ \a -> a + dx)) cam
-           _appCamera app $=! newCam
-           GLUT.postRedisplay Nothing
+           refPosition <- get mousePos
+           case refPosition of
+              Nothing -> return ()
+              Just (Position x' y') -> do
+                 cam <- get camRef
+                 let dx = fromIntegral (x - x')
+                 let dy = fromIntegral (y - y')
+                 let newCam = ((camElevation %~ \e -> e - dy) .
+                               (camAzimuth   %~ \a -> a + dx)) cam
+                 _appCamera app $=! newCam
+                 GLUT.postRedisplay Nothing
      )
 
   -- When keys are pressed, their characters are accumulated into
