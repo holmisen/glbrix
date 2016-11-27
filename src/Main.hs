@@ -59,6 +59,8 @@ main = do
            GLUT.postRedisplay Nothing
      )
 
+  -- When keys are pressed, their characters are accumulated into
+  -- commands than can be executed.
   GLUT.keyboardCallback $=
      (Just $ \char mousePos -> do
            case char of
@@ -71,6 +73,7 @@ main = do
                     Nothing -> return ()
                     Just cmd -> do
                        logInfo $ show cmd
+                       App.execCommand app cmd
                        keysRef $= []
            cmdBuf <- get keysRef
            logInfo $ "Command buffer: " ++ cmdBuf
@@ -138,7 +141,7 @@ handleMouse app LeftButton Down mousePos = do
 
   let newlyPlaced = map (Model.placePartAt $ modelPos) toPlace
 
-  _appEditor app $= Place [App.startBrick] (newlyPlaced ++ placedParts)
+  _appEditor app $= Place toPlace (newlyPlaced ++ placedParts)
 
   GLUT.postRedisplay Nothing
 
