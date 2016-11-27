@@ -9,11 +9,14 @@ import Foreign.Ptr           (Ptr)
 
 import App
 import Camera
+import GLUtils
 import Model
 import ModelRender
 import Primitive (Prim)
 import Types
 import qualified Primitive
+
+logInfo = putStrLn
 
 
 main = do
@@ -106,6 +109,8 @@ handleMouse app LeftButton Down pos = do
   applyCamera =<< get (_appCamera app)
   parts <- get (_appModel app)
   pickPlacedPart pos parts
+--  flippedPos <- GLUtils.flipPosition pos
+  logInfo =<< ((\z -> "position: " ++ show z) <$> GLUtils.getModelPosition pos)
   return ()
 
 handleMouse _ _ _ _ =
