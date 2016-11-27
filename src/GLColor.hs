@@ -13,7 +13,7 @@ green = Color3 0 0.8 0
 
 blue = Color3 0 0 1
 
-yellow = Color3 0 1 1
+yellow = Color3 1 1 0
 
 tan = Color3 1 0.9 0.5
 
