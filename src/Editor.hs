@@ -28,6 +28,12 @@ partsToPlace (Parts ps)   = ps
 
 --------------------------------------------------------------------------------
 
+placeParts :: [PlacedPart] -> Editor -> Editor
+placeParts toPlace (Place _ placed) = Place toPlace placed
+placeParts toPlace (Parts placed)   = Place toPlace placed
+
+--------------------------------------------------------------------------------
+
 -- Not used now -- should possibly not be in this module
 renderEditor :: Editor -> IO ()
 renderEditor (Place toPlace placed) = do
