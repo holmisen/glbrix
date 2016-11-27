@@ -9,6 +9,7 @@ import Foreign.Ptr           (Ptr)
 
 import App
 import Camera
+import Command
 import Editor
 import GLUtils
 import Model
@@ -38,6 +39,7 @@ main = do
 
   mousePos <- newIORef (undefined :: Position)
   camRef   <- newIORef (undefined :: Camera)
+  keysRef  <- newIORef []
 
   GLUT.mouseCallback $=
      (Just $ \ btn keyState p -> do
@@ -55,6 +57,23 @@ main = do
                          (camAzimuth   %~ \a -> a + dx)) cam
            _appCamera app $=! newCam
            GLUT.postRedisplay Nothing
+     )
+
+  GLUT.keyboardCallback $=
+     (Just $ \char mousePos -> do
+           case char of
+              '\b'   -> keysRef $~ safeTail
+              '\ESC' -> keysRef $= []
+              _ -> do
+                 keysRef $~ (char :)
+                 keys <- get keysRef
+                 case Command.readCommand (reverse keys) of
+                    Nothing -> return ()
+                    Just cmd -> do
+                       logInfo $ show cmd
+                       keysRef $= []
+           cmdBuf <- get keysRef
+           logInfo $ "Command buffer: " ++ cmdBuf
      )
 
   GLUT.mainLoop
@@ -189,3 +208,6 @@ getColorAtPosition pos@(Position posX posY) = do
 
 looseAlpha :: Color4 a -> Color3 a
 looseAlpha (Color4 r g b a) = Color3 r g b
+
+safeTail [] = []
+safeTail xs = tail xs
