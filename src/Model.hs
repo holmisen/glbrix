@@ -52,18 +52,21 @@ type PlacedPart = Tree (Placed Prim)
 translatePart :: V3 Int -> PlacedPart -> PlacedPart
 translatePart v = fmap (lplacement.lposition %~ translate v)
 
+placePartAt :: P3 -> PlacedPart -> PlacedPart
+placePartAt pos = fmap (lplacement.lposition .~ pos)
+
 --------------------------------------------------------------------------------
 -- EXAMPLE
 
 part :: Prim -> P3 -> Rotation -> Maybe Color -> PlacedPart
 part prim pos rot col = Part $ Placed (Placement pos rot) col prim
 
-norot = 0
+noRotation = 0
 
 example :: [PlacedPart]
 example =
-   [ part (Brick 2 4) (P3 0 0 1) norot (Just Red)
-   , part (Brick 1 2) (P3 0 5 1) norot (Just Blue)
+   [ part (Brick 2 4) (P3 0 0 1) noRotation (Just Red)
+   , part (Brick 1 2) (P3 0 5 1) noRotation (Just Blue)
    , Group
-     [ part (Plate 6 10) (P3 0 0 0) norot (Just Green) ]
+     [ part (Plate 6 10) (P3 0 0 0) noRotation (Just Green) ]
    ]
