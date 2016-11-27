@@ -26,6 +26,13 @@ renderModel parts = do
    GL.polygonOffsetFill $= Disabled
 
 
+renderModelWireframe :: Foldable t => t PlacedPart -> IO ()
+renderModelWireframe parts = do
+   -- Render part wireframe in the parts color
+   GL.polygonMode $= (GL.Line, GL.Line)
+   traverse_ (renderPart renderColor) parts
+
+
 type Renderer a = (Color -> IO ()) -> a -> IO ()
 
 renderWithUniqColors :: Renderer a -> [a] -> IO ()
