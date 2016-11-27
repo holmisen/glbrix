@@ -29,8 +29,10 @@ cmdColor = do
       case c of
          'b' -> return Blue
          'g' -> return Green
-         'l' -> return Black
+         'k' -> return Black
+         'l' -> return LightBlue
          'r' -> return Red
+         't' -> return Tan
          'w' -> return White
          'y' -> return Yellow
          _   -> pfail

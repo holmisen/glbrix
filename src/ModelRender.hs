@@ -57,12 +57,14 @@ renderRotation (Rotation r) = GL.rotate (90 * fromIntegral r) (vector3f 0 0 1)
 renderColor :: Color -> IO ()
 renderColor = GL.color . go
    where
-      go Red    = GLColor.red
-      go Green  = GLColor.green
-      go Blue   = GLColor.blue
-      go Yellow = GLColor.yellow
-      go White  = GLColor.white
-      go Black  = GLColor.black
+      go Black     = GLColor.black
+      go Blue      = GLColor.blue
+      go Green     = GLColor.green
+      go LightBlue = GLColor.lightBlue
+      go Red       = GLColor.red
+      go Tan       = GLColor.tan
+      go White     = GLColor.white
+      go Yellow    = GLColor.yellow
 
 --------------------------------------------------------------------------------
 
