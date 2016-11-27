@@ -3,6 +3,7 @@ module ModelRender where
 import Data.Foldable (traverse_)
 import Data.StateVar
 import qualified Graphics.Rendering.OpenGL as GL
+import Graphics.Rendering.OpenGL.GL.VertexArrays (Capability(..))
 
 import Model
 import Primitive
@@ -11,7 +12,18 @@ import Types
 --------------------------------------------------------------------------------
 
 renderModel :: [PlacedPart] -> IO ()
-renderModel = traverse_ (renderPart renderColor)
+renderModel parts = do
+   -- Render part wireframe in constant color
+   GL.polygonMode $= (GL.Line, GL.Line)
+   traverse_ (renderPart $ const $ GL.color $ Color3 0.1 0.1 (0.1 :: GLfloat)) parts
+
+   -- Render part polygons
+   GL.polygonMode $= (GL.Fill, GL.Fill)
+   GL.polygonOffset $= (1,1)
+   GL.polygonOffsetFill $= Enabled
+   traverse_ (renderPart renderColor) parts
+   GL.polygonOffsetFill $= Disabled
+
 
 type Renderer a = (Color -> IO ()) -> a -> IO ()
 
