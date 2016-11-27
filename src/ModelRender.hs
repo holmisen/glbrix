@@ -46,7 +46,7 @@ renderColor = GL.color . go
    where
       c r g b = Color3 r g b :: Color3 GLfloat
       go Red    = c 1 0 0
-      go Green  = c 0 1 0
+      go Green  = c 0 0.8 0
       go Blue   = c 0 0 1
       go Yellow = c 1 1 0
       go White  = c 0.8 0.8 0.8
