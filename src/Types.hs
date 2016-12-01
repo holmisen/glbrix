@@ -10,6 +10,7 @@ module Types
   , P3(..)
   , V3
   , translate
+  , vectorBetween
   )
 where
 
@@ -26,3 +27,7 @@ data Color = Red | Green | Blue | Yellow | White | Black | Tan | LightBlue
 
 translate :: V3 Int -> P3 -> P3
 translate (Vector3 a b c) (P3 x y z) = P3 (x + a) (y + b) (z + c)
+
+
+vectorBetween :: P3 -> P3 -> V3 Int
+vectorBetween (P3 a b c) (P3 x y z) = Vector3 (x-a) (y-b) (z-c)
