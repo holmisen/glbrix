@@ -49,7 +49,7 @@ renderPlaced :: Renderer (Placed Prim)
 renderPlaced renderColor (Placed p c a) =
    GL.preservingMatrix $ do
       renderPlacement p
-      traverse_ renderColor c
+      renderColor c
       Primitive.render a
 
 renderPlacement (Placement p r) = do

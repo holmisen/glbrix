@@ -21,7 +21,7 @@ data Placement = Placement { position :: !P3, rotation :: !Rotation }
 lposition :: Lens' Placement P3
 lposition = lens position (\p newPosition -> p { position = newPosition })
 
-data Placed a = Placed !Placement !(Maybe Color) !a
+data Placed a = Placed !Placement !Color !a
   deriving Show
 
 lplacement :: Lens' (Placed a) Placement
@@ -60,15 +60,15 @@ placePartAt pos = fmap (lplacement.lposition .~ pos)
 --------------------------------------------------------------------------------
 -- EXAMPLE
 
-part :: Prim -> P3 -> Rotation -> Maybe Color -> PlacedPart
+part :: Prim -> P3 -> Rotation -> Color -> PlacedPart
 part prim pos rot col = Part $ Placed (Placement pos rot) col prim
 
 noRotation = 0
 
 example :: [PlacedPart]
 example =
-   [ part (Brick 2 4) (P3 0 0 1) noRotation (Just Red)
-   , part (Brick 1 2) (P3 0 5 1) noRotation (Just Blue)
+   [ part (Brick 2 4) (P3 0 0 1) noRotation Red
+   , part (Brick 1 2) (P3 0 5 1) noRotation Blue
    , Group
-     [ part (Plate 6 10) (P3 0 0 0) noRotation (Just Green) ]
+     [ part (Plate 6 10) (P3 0 0 0) noRotation Green ]
    ]

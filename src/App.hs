@@ -45,9 +45,9 @@ newDefaultApp = do
 
 --------------------------------------------------------------------------------
 
-startPlate = part (Plate 20 20) (P3 (-10) (-10) 0) noRotation (Just Types.Green)
+startPlate = part (Plate 20 20) (P3 (-10) (-10) 0) noRotation Types.Green
 
-startBrick = part (Brick 2 2) (P3 0 0 1) noRotation (Just Types.Red)
+startBrick = part (Brick 2 2) (P3 0 0 1) noRotation Types.Red
 
 startEditor = Editor.Place [startBrick] [startPlate]
 
@@ -58,10 +58,10 @@ execCommand app cmd = do
    color <- get (_appCurrentColor app)
    case cmd of
       CmdPlate l w ->
-         let plate = part (Plate l w) (P3 0 0 0) noRotation (Just color)
+         let plate = part (Plate l w) (P3 0 0 0) noRotation color
          in _appEditor app $~ Editor.placeParts [plate]
       CmdBrick l w ->
-         let brick = part (Brick l w) (P3 0 0 0) noRotation (Just color)
+         let brick = part (Brick l w) (P3 0 0 0) noRotation color
          in _appEditor app $~ Editor.placeParts [brick]
       CmdColor c ->
          _appCurrentColor app $= c
