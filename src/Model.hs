@@ -55,6 +55,8 @@ translatePart v = fmap (lplacement.lposition %~ translate v)
 placePartAt :: P3 -> PlacedPart -> PlacedPart
 placePartAt pos = fmap (lplacement.lposition .~ pos)
 
+-- TODO: rotatePart
+
 --------------------------------------------------------------------------------
 -- EXAMPLE
 
