@@ -70,3 +70,5 @@ execCommand app cmd = do
          _appEditor app $~ Editor.cloneSelectedParts
       CmdDelete ->
          _appEditor app $~ Editor.deleteSelected
+      CmdMove ->
+         _appEditor app $~ Editor.placeSelectedParts

@@ -17,12 +17,13 @@ data Command
    | CmdBrick Int Int
    | CmdClone
    | CmdDelete
+   | CmdMove
    deriving Show
 
 readCommand :: [Char] -> Maybe Command
 readCommand = fmap fst . listToMaybe . readP_to_S (command <* eof)
 
-command = P.choice [ cmdColor, cmdPlate, cmdBrick, cmdClone, cmdDelete ]
+command = P.choice [ cmdColor, cmdPlate, cmdBrick, cmdClone, cmdDelete, cmdMove ]
 
 cmdColor = do
    P.char 'c'
@@ -55,6 +56,8 @@ cmdBrick = do
 cmdClone = const CmdClone <$> P.char ' '
 
 cmdDelete = const CmdDelete <$> P.char 'x'
+
+cmdMove = const CmdMove <$> P.char 'm'
 
 int :: ReadP Int
 int = read <$> many1 (satisfy isDigit)
