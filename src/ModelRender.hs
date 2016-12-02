@@ -67,6 +67,11 @@ renderColor = GL.color . go
    where
       go Black     = GLColor.black
       go Blue      = GLColor.blue
+      go Brown     = GLColor.brown
+      go DarkBlue  = GLColor.darkBlue
+      go DarkGray  = GLColor.darkGray
+      go DarkGreen = GLColor.darkGreen
+      go Gray      = GLColor.gray
       go Green     = GLColor.green
       go LightBlue = GLColor.lightBlue
       go Red       = GLColor.red

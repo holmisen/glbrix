@@ -21,7 +21,20 @@ type V3 = Vector3
 
 data P3 = P3 !Int !Int !Int deriving (Eq, Ord, Show)
 
-data Color = Red | Green | Blue | Yellow | White | Black | Tan | LightBlue
+data Color
+    = Black
+    | Blue
+    | Brown
+    | DarkBlue
+    | DarkGray
+    | DarkGreen
+    | Gray
+    | Green
+    | LightBlue
+    | Red
+    | Tan
+    | White
+    | Yellow
    deriving (Eq, Ord, Show)
 
 

@@ -28,9 +28,14 @@ cmdColor = do
    CmdColor <$>
       case c of
          'b' -> return Blue
+         'B' -> return DarkBlue
+         'e' -> return Gray
+         'E' -> return DarkGray
          'g' -> return Green
+         'G' -> return DarkGreen
          'k' -> return Black
          'l' -> return LightBlue
+         'o' -> return Brown
          'r' -> return Red
          't' -> return Tan
          'w' -> return White
