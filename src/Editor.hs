@@ -72,6 +72,9 @@ cloneSelectedParts ed =
 groupSelectedParts :: Editor -> Editor
 groupSelectedParts = lselectedParts %~ pure . Model.groupParts
 
+ungroupSelectedParts :: Editor -> Editor
+ungroupSelectedParts = lselectedParts %~ concatMap Model.ungroupPart
+
 escapeEdit :: Editor -> Editor
 escapeEdit (Place _ placed) = Edit $ Selector.makeSelector placed
 escapeEdit (Edit s)         = Edit $ Selector.unselectAll s
