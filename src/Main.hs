@@ -95,6 +95,17 @@ main = do
            logInfo $ "Command buffer: " ++ cmdBuf
      )
 
+  GLUT.specialCallback $=
+     (Just $ \key mousePos -> do
+           case key of
+              KeyUp    -> _appEditor app $~ Editor.moveSelectedParts (Vector3   0   1  0)
+              KeyDown  -> _appEditor app $~ Editor.moveSelectedParts (Vector3   0 (-1) 0)
+              KeyLeft  -> _appEditor app $~ Editor.moveSelectedParts (Vector3 (-1)  0  0)
+              KeyRight -> _appEditor app $~ Editor.moveSelectedParts (Vector3   1   0  0)
+              otherwise -> return ()
+           GLUT.postRedisplay Nothing
+     )
+
   GLUT.mainLoop
 
 
