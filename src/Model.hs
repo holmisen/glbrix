@@ -9,6 +9,7 @@ import Primitive
 import Types
 
 import Data.Foldable (traverse_)
+import Data.Semigroup
 import Lens.Micro
 import Lens.Micro.Extras (view)
 
@@ -72,6 +73,11 @@ groupParts = groupTrees
 
 ungroupPart :: PlacedPart -> [PlacedPart]
 ungroupPart = ungroupTree
+
+-- | Get the smallest z position of the part
+getPartMinZ :: PlacedPart -> Min Int
+getPartMinZ = view (traversed.lplacement.lposition . to minZ)
+   where minZ (P3 _ _ z) = Min z
 
 -- TODO: rotatePart
 
