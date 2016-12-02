@@ -36,8 +36,9 @@ renderModelWireframe parts = do
 type Renderer a = (Color -> IO ()) -> a -> IO ()
 
 renderWithUniqColors :: Renderer a -> [a] -> IO ()
-renderWithUniqColors render =
-   traverse_ (\(color, part) -> render (const $ GL.color color) part) . zip [zero ..]
+renderWithUniqColors render xs = do
+   GL.polygonMode $= (GL.Fill, GL.Fill)
+   traverse_ (\(color, part) -> render (const $ GL.color color) part) (zip [zero ..] xs)
    where
       zero = toEnum 0 :: Color3 GLubyte
 
