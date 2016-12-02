@@ -21,6 +21,7 @@ flipPosition (Position posX posY) = do
 getWindowZ :: Position -> IO GLfloat
 getWindowZ pos  = do
    GL.rowAlignment Unpack $= 1
+   GL.readBuffer $= BackBuffers
 
    ptr <- mallocArray 1 :: IO (Ptr GLfloat)
    GL.readPixels pos (Size 1 1) (PixelData DepthComponent GL.Float ptr)
