@@ -69,6 +69,9 @@ cloneSelectedParts :: Editor -> Editor
 cloneSelectedParts ed =
    Place (ed ^. lselectedParts) (ed ^. lselectedParts ++ ed ^. lnonSelectedParts)
 
+groupSelectedParts :: Editor -> Editor
+groupSelectedParts = lselectedParts %~ pure . Model.groupParts
+
 escapeEdit :: Editor -> Editor
 escapeEdit (Place _ placed) = Edit $ Selector.makeSelector placed
 escapeEdit (Edit s)         = Edit $ Selector.unselectAll s
