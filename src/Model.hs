@@ -77,6 +77,8 @@ part prim pos rot col = Part $ Placed (Placement pos rot) col prim
 
 noRotation = 0
 
+examplePart = part (Brick 2 2) (P3 0 0 0) noRotation Red
+
 example :: [PlacedPart]
 example =
    [ part (Brick 2 4) (P3 0 0 1) noRotation Red
