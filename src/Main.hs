@@ -177,7 +177,6 @@ handleMouse app LeftButton Down mousePos = do
            Just partIndex ->
               _appEditor app $= Editor.toggleSelected partIndex editor
 
-  logInfo . show =<< get (_appEditor app)
   GLUT.postRedisplay Nothing
 
 handleMouse _ _ _ _ =
