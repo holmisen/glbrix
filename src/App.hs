@@ -68,3 +68,5 @@ execCommand app cmd = do
          _appEditor app $~ Editor.setSelectedPartsColor c
       CmdClone ->
          _appEditor app $~ Editor.cloneSelectedParts
+      CmdDelete ->
+         _appEditor app $~ Editor.deleteSelected
