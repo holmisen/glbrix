@@ -67,6 +67,12 @@ partPosition (Group ps) = partPosition (head ps)
 setPartColor :: Color -> PlacedPart -> PlacedPart
 setPartColor c = traversed.lcolor .~ c
 
+groupParts :: [PlacedPart] -> PlacedPart
+groupParts = groupTrees
+
+ungroupPart :: PlacedPart -> [PlacedPart]
+ungroupPart = ungroupTree
+
 -- TODO: rotatePart
 
 --------------------------------------------------------------------------------
