@@ -19,12 +19,13 @@ data Command
    | CmdDelete
    | CmdMove
    | CmdGroup
+   | CmdUngroup
    deriving Show
 
 readCommand :: [Char] -> Maybe Command
 readCommand = fmap fst . listToMaybe . readP_to_S (command <* eof)
 
-command = P.choice [ cmdColor, cmdPlate, cmdBrick, cmdClone, cmdDelete, cmdMove, cmdGroup ]
+command = P.choice [ cmdColor, cmdPlate, cmdBrick, cmdClone, cmdDelete, cmdMove, cmdGroup, cmdUngroup ]
 
 cmdColor = do
    P.char 'c'
@@ -61,6 +62,8 @@ cmdDelete = const CmdDelete <$> P.char 'x'
 cmdMove = const CmdMove <$> P.char 'm'
 
 cmdGroup = const CmdGroup <$> P.char 'g'
+
+cmdUngroup = const CmdUngroup <$> P.char 'G'
 
 int :: ReadP Int
 int = read <$> many1 (satisfy isDigit)

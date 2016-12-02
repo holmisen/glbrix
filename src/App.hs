@@ -74,3 +74,5 @@ execCommand app cmd = do
          _appEditor app $~ Editor.placeSelectedParts
       CmdGroup ->
          _appEditor app $~ Editor.groupSelectedParts
+      CmdUngroup ->
+         _appEditor app $~ Editor.ungroupSelectedParts
