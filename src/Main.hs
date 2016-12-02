@@ -77,7 +77,10 @@ main = do
      (Just $ \char mousePos -> do
            case char of
               '\b'   -> keysRef $~ safeTail
-              '\ESC' -> keysRef $= []
+              '\ESC' -> do
+                 keysRef $= []
+                 _appEditor app $~ Editor.escapeEdit
+                 GLUT.postRedisplay Nothing
               _ -> do
                  keysRef $~ (char :)
                  keys <- get keysRef
