@@ -59,6 +59,9 @@ placeNewParts :: [PlacedPart] -> Editor -> Editor
 placeNewParts toPlace (Place _ placed) = Place toPlace placed
 placeNewParts toPlace (Edit placed)   = Place toPlace $ toList placed
 
+placeSelectedParts :: Editor -> Editor
+placeSelectedParts ed = Place (ed ^. lselectedParts) (ed ^. lnonSelectedParts)
+
 setSelectedPartsColor :: Color -> Editor -> Editor
 setSelectedPartsColor c = lselectedParts.each.traversed.lcolor .~ c
 
