@@ -87,6 +87,7 @@ main = do
                        logInfo $ show cmd
                        App.execCommand app cmd
                        keysRef $= []
+                       GLUT.postRedisplay Nothing
            cmdBuf <- get keysRef
            logInfo $ "Command buffer: " ++ cmdBuf
      )
@@ -134,11 +135,10 @@ display app = do
   editor <- get (_appEditor app)
 
   renderAxis 2
-  renderModel $ Editor.placedParts editor
 
-  case editor of
-     Place toPlace _ -> renderModelWireframe toPlace
-     _               -> return ()
+  -- Visible
+  renderModel          $ editor ^. lnonSelectedParts
+  renderModelWireframe $ editor ^. lselectedParts
 
   GLUT.swapBuffers
 
@@ -149,19 +149,21 @@ handleMouse app LeftButton Down mousePos = do
 
   editor <- get (_appEditor app)
 
-  -- TODO: Handle other modes
-  let Place toPlace placedParts = editor
+  case editor of
+     Place {} ->
+        _appEditor app $= Editor.placeParts editor
 
---  pickPlacedPart mousePos placedParts
+     Edit {} -> do
+        let placed = editor ^. lnonSelectedParts
+        partMaybe <- pickPlacedPart mousePos (Editor.allParts editor)
+        logInfo $ "Pick placed part: " ++ show partMaybe
+        case partMaybe of
+           Nothing ->
+              _appEditor app $= Editor.unselectAll editor
+           Just partIndex ->
+              _appEditor app $= Editor.toggleSelected partIndex editor
 
---  modelPos <- GLUtils.getModelPosition mousePos
-
---  logInfo $ "position: " ++ show modelPos
-
---  let newlyPlaced = map (Model.placePartAt $ modelPos) toPlace
-
-  _appEditor app $= Place toPlace (toPlace ++ placedParts)
-
+  logInfo . show =<< get (_appEditor app)
   GLUT.postRedisplay Nothing
 
 handleMouse _ _ _ _ =
@@ -171,12 +173,11 @@ handleMouse _ _ _ _ =
 handleMouseMove :: App -> MotionCallback
 handleMouseMove app mousePos = do
    modelPos <- GLUtils.getModelPosition mousePos
-   logInfo $ "Pos: " ++ show modelPos
+--   logInfo $ "Pos: " ++ show modelPos
    editor <- get (_appEditor app)
    case editor of
-      Place toPlace placedParts -> do
-         let toPlace' = map (Model.placePartAt modelPos) toPlace
-         _appEditor app $= Place toPlace' placedParts
+      Place {} -> do
+         _appEditor app $= Editor.moveParts modelPos editor
          GLUT.postRedisplay Nothing
       _other ->
          return ()
@@ -185,7 +186,7 @@ handleMouseMove app mousePos = do
 -- | Return the index of the placed part under given position, or
 -- Nothing if there is no part under position.
 pickPlacedPart :: Position -> [PlacedPart] -> IO (Maybe Int)
-pickPlacedPart = pickPart renderPart
+pickPlacedPart = pickPart ModelRender.renderPart
 
 -- | Return the z position of the top of the part under given position
 -- or 0 if there is no part under position.
@@ -223,7 +224,7 @@ getColorAtPosition pos@(Position posX posY) = do
   -- glFlush()
   -- glFinish()
 
---  GL.readBuffer $= FrontBuffers
+  GL.readBuffer $= BackBuffers
 
   GL.rowAlignment Unpack $= 1
 

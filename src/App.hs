@@ -59,9 +59,10 @@ execCommand app cmd = do
    case cmd of
       CmdPlate l w ->
          let plate = part (Plate l w) (P3 0 0 0) noRotation color
-         in _appEditor app $~ Editor.placeParts [plate]
+         in _appEditor app $~ Editor.placeNewParts [plate]
       CmdBrick l w ->
          let brick = part (Brick l w) (P3 0 0 0) noRotation color
-         in _appEditor app $~ Editor.placeParts [brick]
-      CmdColor c ->
+         in _appEditor app $~ Editor.placeNewParts [brick]
+      CmdColor c -> do
          _appCurrentColor app $= c
+         _appEditor app $~ Editor.setSelectedPartsColor c

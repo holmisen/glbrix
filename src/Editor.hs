@@ -9,7 +9,6 @@ import Types
 import qualified Selector
 
 import Data.Foldable
-import Graphics.Rendering.OpenGL as GL
 import Lens.Micro
 import Lens.Micro.Extras (view)
 import Lens.Micro.TH
@@ -18,39 +17,87 @@ import Lens.Micro.TH
 
 data Editor
    = Place [PlacedPart] [PlacedPart]
-   | Parts (Selector PlacedPart)
+   | Edit (Selector PlacedPart)
    deriving Show
 
-placedParts :: Editor -> [PlacedPart]
-placedParts (Place _ placedParts) = placedParts
-placedParts (Parts ps) = toList ps
 
-partsToPlace :: Editor -> [PlacedPart]
-partsToPlace (Place ps _) = ps
-partsToPlace (Parts _)    = []
+lpartsToPlace :: Lens' Editor [PlacedPart]
+lpartsToPlace = lens
+   (\ed -> case ed of
+         Place toPlace placed -> toPlace
+         _                    -> [])
+   (\ed toPlace -> case ed of
+         Place _ placed -> Place toPlace placed
+         _              -> ed)
+
+lnonSelectedParts :: Lens' Editor [PlacedPart]
+lnonSelectedParts = lens
+   (\ed -> case ed of
+         Place _ placed -> placed
+         Edit s         -> s ^. Selector.nonSelected)
+   (\ed placed -> case ed of
+         Place toPlace _ -> Place toPlace placed
+         Edit s          -> Edit (s & Selector.selected .~ placed))
+
+lselectedParts :: Lens' Editor [PlacedPart]
+lselectedParts = lens
+   (\ed -> case ed of
+         Place toPlace placed -> toPlace
+         Edit s               -> s ^. Selector.selected)
+   (\ed newSelected -> case ed of
+         Place _ placed -> Place newSelected placed
+         Edit s         -> Edit (s & Selector.selected .~ newSelected))
+
+allParts :: Editor -> [PlacedPart]
+allParts (Place toPlace placed) = toPlace ++ placed
+allParts (Edit s)               = toList s
 
 --------------------------------------------------------------------------------
 
-placeParts :: [PlacedPart] -> Editor -> Editor
-placeParts toPlace (Place _ placed) = Place toPlace placed
-placeParts toPlace (Parts placed)   = Place toPlace $ toList placed
+-- | Add new parts to place
+placeNewParts :: [PlacedPart] -> Editor -> Editor
+placeNewParts toPlace (Place _ placed) = Place toPlace placed
+placeNewParts toPlace (Edit placed)   = Place toPlace $ toList placed
+
+setSelectedPartsColor :: Color -> Editor -> Editor
+setSelectedPartsColor c = lselectedParts.each.traversed.lcolor .~ c
 
 --------------------------------------------------------------------------------
 
--- Not used now -- should possibly not be in this module
--- renderEditor :: Editor -> IO ()
--- renderEditor (Place toPlace placed) = do
+mapEdit f e@(Edit {}) = f e
+mapEdit _ e           = e
 
---    -- Render wireframe for parts to place
---    GL.polygonMode $= (GL.Line, GL.Line)
---    renderModel toPlace
-
---    -- Render placed parts "normally"
---    GL.polygonMode $= (GL.Fill, GL.Fill)
---    renderModel placed
-
--- renderEditor (Parts parts) = do
---    GL.polygonMode $= (GL.Fill, GL.Fill)
---    renderModel parts
+mapPlace f e@(Place {}) = f e
+mapPlace _ e            = e
 
 --------------------------------------------------------------------------------
+-- PLACE MODE FUNCTIONS
+
+-- | Put parts to place into place
+placeParts :: Editor -> Editor
+placeParts = mapPlace $ \(Place toPlace placed) ->
+   Edit $ Selector.makeSelector (toPlace ++ placed)
+
+moveParts :: P3 -> Editor -> Editor
+moveParts pos = mapPlace $ \(Place toPlace placed) ->
+   let refPos   = partPosition (head toPlace)
+       v        = vectorBetween refPos pos
+       toPlace' = map (translatePart v) toPlace
+   in
+      Place toPlace' placed
+
+--------------------------------------------------------------------------------
+-- EDIT MODE FUNCTIONS
+
+unselectAll :: Editor -> Editor
+unselectAll = mapEdit $ \(Edit s) -> Edit (Selector.unselectAll s)
+
+toggleSelected :: Int -> Editor -> Editor
+toggleSelected i = mapEdit $ \(Edit s) -> Edit (Selector.select i s)
+
+deleteSelected :: Editor -> Editor
+deleteSelected = mapEdit $ \(Edit s) -> Edit (s & Selector.selected .~ [])
+
+--------------------------------------------------------------------------------
+
+exampleEditor = Place [examplePart] []
