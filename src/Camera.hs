@@ -38,6 +38,9 @@ applyCamera (Polar azimuth elevation distance) = do
   GL.loadIdentity
   polarView distance elevation azimuth
 
+  -- Translate scene downwards to make origo be lower
+  GL.translate (Vector3 0 0 (-10::GLfloat))
+
 
 polarView :: GLdouble -> GLdouble -> GLdouble -> IO ()
 polarView distance elevation azimuth = do
