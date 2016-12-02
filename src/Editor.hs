@@ -62,6 +62,14 @@ placeNewParts toPlace (Edit placed)   = Place toPlace $ toList placed
 setSelectedPartsColor :: Color -> Editor -> Editor
 setSelectedPartsColor c = lselectedParts.each.traversed.lcolor .~ c
 
+cloneSelectedParts :: Editor -> Editor
+cloneSelectedParts ed =
+   Place (ed ^. lselectedParts) (ed ^. lselectedParts ++ ed ^. lnonSelectedParts)
+
+escapeEdit :: Editor -> Editor
+escapeEdit (Place _ placed) = Edit $ Selector.makeSelector placed
+escapeEdit (Edit s)         = Edit $ Selector.unselectAll s
+
 --------------------------------------------------------------------------------
 
 mapEdit f e@(Edit {}) = f e
