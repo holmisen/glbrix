@@ -84,6 +84,9 @@ groupSelectedParts = lselectedParts %~ pure . Model.groupParts
 ungroupSelectedParts :: Editor -> Editor
 ungroupSelectedParts = lselectedParts %~ concatMap Model.ungroupPart
 
+moveSelectedParts :: V3 Int -> Editor -> Editor
+moveSelectedParts v = lselectedParts.each %~ translatePart v
+
 escapeEdit :: Editor -> Editor
 escapeEdit (Place _ _ placed) = Edit $ Selector.makeSelector placed
 escapeEdit (Edit s)           = Edit $ Selector.unselectAll s
