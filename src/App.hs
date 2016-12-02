@@ -49,7 +49,7 @@ startPlate = part (Plate 20 20) (P3 (-10) (-10) 0) noRotation Types.Green
 
 startBrick = part (Brick 2 2) (P3 0 0 1) noRotation Types.Red
 
-startEditor = Editor.Place [startBrick] [startPlate]
+startEditor = Editor.makePlace [startBrick] [startPlate]
 
 --------------------------------------------------------------------------------
 

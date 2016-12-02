@@ -9,6 +9,7 @@ import Types
 import qualified Selector
 
 import Data.Foldable
+import Data.Semigroup
 import Lens.Micro
 import Lens.Micro.Extras (view)
 import Lens.Micro.TH
@@ -16,58 +17,66 @@ import Lens.Micro.TH
 --------------------------------------------------------------------------------
 
 data Editor
-   = Place [PlacedPart] [PlacedPart]
+   = Place
+     [PlacedPart]  -- ^ parts to place
+     (Min Int)     -- ^ minimum z of parts to place
+     [PlacedPart]  -- ^ already placed parts
    | Edit (Selector PlacedPart)
    deriving Show
+
+
+makePlace :: [PlacedPart] -> [PlacedPart] -> Editor
+makePlace toPlace placed = Place toPlace minZ placed
+   where
+      minZ = foldMap Model.getPartMinZ toPlace
 
 
 lpartsToPlace :: Lens' Editor [PlacedPart]
 lpartsToPlace = lens
    (\ed -> case ed of
-         Place toPlace placed -> toPlace
-         _                    -> [])
+         Place toPlace _ _ -> toPlace
+         _                 -> [])
    (\ed toPlace -> case ed of
-         Place _ placed -> Place toPlace placed
-         _              -> ed)
+         Place _ _ placed -> makePlace toPlace placed
+         _                -> ed)
 
 lnonSelectedParts :: Lens' Editor [PlacedPart]
 lnonSelectedParts = lens
    (\ed -> case ed of
-         Place _ placed -> placed
-         Edit s         -> s ^. Selector.nonSelected)
+         Place _ _ placed -> placed
+         Edit s           -> s ^. Selector.nonSelected)
    (\ed placed -> case ed of
-         Place toPlace _ -> Place toPlace placed
-         Edit s          -> Edit (s & Selector.selected .~ placed))
+         Place toPlace z _ -> Place toPlace z placed
+         Edit s            -> Edit (s & Selector.selected .~ placed))
 
 lselectedParts :: Lens' Editor [PlacedPart]
 lselectedParts = lens
    (\ed -> case ed of
-         Place toPlace placed -> toPlace
-         Edit s               -> s ^. Selector.selected)
+         Place toPlace _ _ -> toPlace
+         Edit s            -> s ^. Selector.selected)
    (\ed newSelected -> case ed of
-         Place _ placed -> Place newSelected placed
-         Edit s         -> Edit (s & Selector.selected .~ newSelected))
+         Place _ _ placed -> makePlace newSelected placed
+         Edit s           -> Edit (s & Selector.selected .~ newSelected))
 
 allParts :: Editor -> [PlacedPart]
-allParts (Place toPlace placed) = toPlace ++ placed
-allParts (Edit s)               = toList s
+allParts (Place toPlace _ placed) = toPlace ++ placed
+allParts (Edit s)                 = toList s
 
 --------------------------------------------------------------------------------
 
 -- | Add new parts to place
 placeNewParts :: [PlacedPart] -> Editor -> Editor
-placeNewParts toPlace (Place _ placed) = Place toPlace placed
-placeNewParts toPlace (Edit placed)   = Place toPlace $ toList placed
+placeNewParts newParts ed = makePlace newParts (ed ^. lnonSelectedParts)
 
 placeSelectedParts :: Editor -> Editor
-placeSelectedParts ed = Place (ed ^. lselectedParts) (ed ^. lnonSelectedParts)
+placeSelectedParts ed = makePlace (ed ^. lselectedParts) (ed ^. lnonSelectedParts)
 
 setSelectedPartsColor :: Color -> Editor -> Editor
 setSelectedPartsColor c = lselectedParts.each.traversed.lcolor .~ c
 
 cloneSelectedParts :: Editor -> Editor
 cloneSelectedParts ed =
-   Place (ed ^. lselectedParts) (ed ^. lselectedParts ++ ed ^. lnonSelectedParts)
+   makePlace (ed ^. lselectedParts) (ed ^. lselectedParts ++ ed ^. lnonSelectedParts)
 
 groupSelectedParts :: Editor -> Editor
 groupSelectedParts = lselectedParts %~ pure . Model.groupParts
@@ -76,8 +85,8 @@ ungroupSelectedParts :: Editor -> Editor
 ungroupSelectedParts = lselectedParts %~ concatMap Model.ungroupPart
 
 escapeEdit :: Editor -> Editor
-escapeEdit (Place _ placed) = Edit $ Selector.makeSelector placed
-escapeEdit (Edit s)         = Edit $ Selector.unselectAll s
+escapeEdit (Place _ _ placed) = Edit $ Selector.makeSelector placed
+escapeEdit (Edit s)           = Edit $ Selector.unselectAll s
 
 --------------------------------------------------------------------------------
 
@@ -92,16 +101,17 @@ mapPlace _ e            = e
 
 -- | Put parts to place into place
 placeParts :: Editor -> Editor
-placeParts = mapPlace $ \(Place toPlace placed) ->
+placeParts = mapPlace $ \(Place toPlace _ placed) ->
    Edit $ Selector.makeSelector (toPlace ++ placed)
 
 moveParts :: P3 -> Editor -> Editor
-moveParts pos = mapPlace $ \(Place toPlace placed) ->
-   let refPos   = partPosition (head toPlace)
-       v        = vectorBetween refPos pos
-       toPlace' = map (translatePart v) toPlace
+moveParts pos = mapPlace $ \(Place toPlace (Min z) placed) ->
+   let (P3 x y _) = partPosition (head toPlace)
+       refPos     = P3 x y z
+       v          = vectorBetween refPos pos
+       toPlace'   = map (translatePart v) toPlace
    in
-      Place toPlace' placed
+      makePlace toPlace' placed
 
 --------------------------------------------------------------------------------
 -- EDIT MODE FUNCTIONS
@@ -117,4 +127,4 @@ deleteSelected = mapEdit $ \(Edit s) -> Edit (s & Selector.selected .~ [])
 
 --------------------------------------------------------------------------------
 
-exampleEditor = Place [examplePart] []
+exampleEditor = makePlace [examplePart] []
