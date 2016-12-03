@@ -9,6 +9,7 @@ import Model
 import Primitive
 import Types
 
+import Control.Arrow ((>>>))
 import Data.Foldable (for_)
 import Data.IORef
 import Graphics.Rendering.OpenGL as GL
@@ -73,6 +74,7 @@ execCommand app cmd = do
       CmdMove ->
          _appEditor app $~ Editor.placeSelectedParts
       CmdGroup ->
-         _appEditor app $~ Editor.groupSelectedParts
+         _appEditor app $~ (Editor.groupSelectedParts >>>
+                            Editor.unselectAll)
       CmdUngroup ->
          _appEditor app $~ Editor.ungroupSelectedParts
