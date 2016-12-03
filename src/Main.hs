@@ -31,6 +31,8 @@ main = do
 
   GLUT.createWindow "glblocks"
 
+  logInfo =<< get GLUT.glutVersion
+
   -- This must be located *after* the call to createWindow.
   GL.depthFunc $= Just Less
 
@@ -129,7 +131,7 @@ reshape app (Size w h) = do
 
 --  GL.ortho (-w2) w2 (-h2) h2 1 500
 
-  GL.frustum (-w2) w2 (-h2) h2 20 80
+  GL.frustum (-w2) w2 (-h2) h2 20 200
 
   GL.matrixMode $= Modelview 0
 
@@ -178,6 +180,14 @@ handleMouse app LeftButton Down mousePos = do
               _appEditor app $= Editor.toggleSelected partIndex editor
 
   GLUT.postRedisplay Nothing
+
+handleMouse app WheelUp Down mousePos = do
+   _appCamera app $~ (camDistance %~ (\d -> d - 5))
+   GLUT.postRedisplay Nothing
+
+handleMouse app WheelDown Down mousePos = do
+   _appCamera app $~ (camDistance %~ (\d -> d + 5))
+   GLUT.postRedisplay Nothing
 
 handleMouse _ _ _ _ =
   return ()
