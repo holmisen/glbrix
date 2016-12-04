@@ -9,14 +9,15 @@ module Types
   , Vertex3(..)
   , P3(..)
   , lposX, lposY, lposZ
+  , origo
   , V3
   , translate
   , rotateZ
   , vectorBetween
+  , vectorAdd
   )
 where
 
-import Data.Complex (Complex((:+)))
 import Graphics.Rendering.OpenGL (Color3(..), Color4(..), GLdouble, GLfloat, GLubyte, Vector3(..), Vertex3(..))
 import GLInstances ()
 import Lens.Micro
@@ -24,6 +25,9 @@ import Lens.Micro
 type V3 = Vector3
 
 data P3 = P3 !Int !Int !Int deriving (Eq, Ord, Show)
+
+origo :: P3
+origo = P3 0 0 0
 
 lposX :: Lens' P3 Int
 lposX = lens (\(P3 x _ _) -> x) (\(P3 _ y z) x -> P3 x y z)
@@ -55,6 +59,7 @@ data Color
 translate :: V3 Int -> P3 -> P3
 translate (Vector3 a b c) (P3 x y z) = P3 (x + a) (y + b) (z + c)
 
+
 -- | Rotate full 90 degrees around Z. Later, use floating point P3 and
 -- enable arbitrary rotations.
 rotateZ :: Int -> P3 -> P3
@@ -67,5 +72,10 @@ rotateZ n = go (n `mod` 4)
       -- x' = negate y
       -- y' = x
 
+
 vectorBetween :: P3 -> P3 -> V3 Int
 vectorBetween (P3 a b c) (P3 x y z) = Vector3 (x-a) (y-b) (z-c)
+
+
+vectorAdd :: Num a => Vector3 a -> Vector3 a -> Vector3 a
+vectorAdd (Vector3 a b c) (Vector3 x y z) = Vector3 (a+x) (b+y) (c+z)
