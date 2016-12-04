@@ -36,7 +36,7 @@ newDefaultApp :: IO App
 newDefaultApp = do
    cam <- newIORef defaultCamera
    editor <- newIORef $ startEditor
-   color <- newIORef $ Types.Red
+   color <- newIORef $ Types.Tan
    return App
       { _appCamera = cam
       , _appProjection = Ortho
@@ -48,7 +48,7 @@ newDefaultApp = do
 
 startPlate = part (Plate 20 20) (P3 (-10) (-10) 0) noRotation Types.Green
 
-startBrick = part (Brick 2 2) (P3 0 0 1) noRotation Types.Red
+startBrick = part (Brick 2 2) (P3 0 0 1) noRotation Types.Tan
 
 startEditor = Editor.placeNewParts [startBrick] $ Editor.makeEditor [startPlate]
 
