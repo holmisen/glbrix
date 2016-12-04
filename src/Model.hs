@@ -60,9 +60,6 @@ type PlacedPart = Tree (Placed Prim)
 translatePart :: V3 Int -> PlacedPart -> PlacedPart
 translatePart v = traversed.lplacement.lposition %~ translate v
 
-placePartAt :: P3 -> PlacedPart -> PlacedPart
-placePartAt pos = traversed.lplacement.lposition .~ pos
-
 -- | The position of the first part in the tree.
 partPosition :: PlacedPart -> P3
 partPosition (Part a)   = a ^. lplacement.lposition
@@ -82,19 +79,22 @@ getPartMinZ :: PlacedPart -> Min Int
 getPartMinZ = view (traversed.lplacement.lposition . to minZ)
    where minZ (P3 _ _ z) = Min z
 
--- TODO: rotatePart
+-- All parts in a group are rotated around the part position of the
+-- topmost group.
+--
+-- All parts not in a group are rotated around their own position
 rotatePart :: Rotation -> PlacedPart -> PlacedPart
-rotatePart (Rotation r) = go (P3 0 0 0)
-   where
-      go :: P3 -> PlacedPart -> PlacedPart
-      go refPoint (Part p) = Part (p & lplacement.lposition %~ rotateAroundPoint r refPoint)
-      go refPoint g@(Group ps) = Group $ map (go $ partPosition g) ps
+rotatePart r p = p & traversed %~ rotatePlaced r (partPosition p)
 
+rotatePlaced :: Rotation -> P3 -> Placed a -> Placed a
+rotatePlaced r@(Rotation n) refPoint p =
+   p & lplacement.lposition %~ rotateAroundPoint n refPoint
+     & lplacement.lrotation %~ (+r)
 
 rotateAroundPoint :: Int -> P3 -> P3 -> P3
-rotateAroundPoint r refPoint p =
+rotateAroundPoint r (P3 x y z) p =
    translate v $ rotateZ r $ translate (fmap negate v) p
-   where v = vectorBetween refPoint p
+   where v = Vector3 x y z
 
 --------------------------------------------------------------------------------
 -- EXAMPLE
@@ -106,12 +106,19 @@ noRotation = 0
 
 examplePart = part (Brick 2 2) (P3 0 0 0) noRotation Red
 
+exampleGroup =
+   Group
+   [ part (Brick 2 2) (P3 1 2 0) noRotation Green
+   , part (Brick 3 2) (P3 4 3 0) noRotation Green
+   , Group
+     [ part (Brick 1 1) (P3 4 6 0) noRotation Tan
+     , part (Brick 1 2) (P3 6 6 0) noRotation Tan
+     ]
+   ]
+
 example :: [PlacedPart]
 example =
    [ part (Brick 2 4) (P3 0 0 1) noRotation Red
    , part (Brick 1 2) (P3 0 5 1) noRotation Blue
-   , Group
-     [ part (Brick 2 2) (P3 1 2 0) noRotation Green
-     , part (Brick 2 4) (P3 2 0 0) noRotation Green
-     ]
+   , exampleGroup
    ]
