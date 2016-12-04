@@ -29,7 +29,7 @@ main = do
 
   GLUT.initialDisplayMode $= [GLUT.RGBAMode, GLUT.DoubleBuffered, GLUT.WithDepthBuffer]
 
-  GLUT.createWindow "glblocks"
+  GLUT.createWindow "glbrix"
 
   logInfo =<< get GLUT.glutVersion
 
