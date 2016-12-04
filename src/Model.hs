@@ -23,6 +23,9 @@ data Placement = Placement { position :: !P3, rotation :: !Rotation }
 lposition :: Lens' Placement P3
 lposition = lens position (\p newPosition -> p { position = newPosition })
 
+lrotation :: Lens' Placement Rotation
+lrotation = lens rotation (\p newRotation -> p { rotation = newRotation })
+
 data Placed a = Placed !Placement !Color !a
   deriving Show
 
@@ -80,6 +83,18 @@ getPartMinZ = view (traversed.lplacement.lposition . to minZ)
    where minZ (P3 _ _ z) = Min z
 
 -- TODO: rotatePart
+rotatePart :: Rotation -> PlacedPart -> PlacedPart
+rotatePart (Rotation r) = go (P3 0 0 0)
+   where
+      go :: P3 -> PlacedPart -> PlacedPart
+      go refPoint (Part p) = Part (p & lplacement.lposition %~ rotateAroundPoint r refPoint)
+      go refPoint g@(Group ps) = Group $ map (go $ partPosition g) ps
+
+
+rotateAroundPoint :: Int -> P3 -> P3 -> P3
+rotateAroundPoint r refPoint p =
+   translate v $ rotateZ r $ translate (fmap negate v) p
+   where v = vectorBetween refPoint p
 
 --------------------------------------------------------------------------------
 -- EXAMPLE
@@ -96,5 +111,7 @@ example =
    [ part (Brick 2 4) (P3 0 0 1) noRotation Red
    , part (Brick 1 2) (P3 0 5 1) noRotation Blue
    , Group
-     [ part (Plate 6 10) (P3 0 0 0) noRotation Green ]
+     [ part (Brick 2 2) (P3 1 2 0) noRotation Green
+     , part (Brick 2 4) (P3 2 0 0) noRotation Green
+     ]
    ]

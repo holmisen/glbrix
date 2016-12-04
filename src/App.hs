@@ -78,3 +78,5 @@ execCommand app cmd = do
                             Editor.unselectAll)
       CmdUngroup ->
          _appEditor app $~ Editor.ungroupSelectedParts
+      CmdRotate ->
+         _appEditor app $~ Editor.rotateSelectedParts
