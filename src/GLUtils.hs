@@ -54,7 +54,7 @@ getModelPosition mousePos = do
 
 
 vertex3ToP3 :: RealFrac a => Vertex3 a -> P3
-vertex3ToP3 (Vertex3 x y z) = P3 (floor (x/2)) (floor (y/2)) (round z)
+vertex3ToP3 (Vertex3 x y z) = P3 (round (x/2)) (round (y/2)) (round z)
 
 
 getModelView :: GLsizei -> IO (GLmatrix GLdouble)

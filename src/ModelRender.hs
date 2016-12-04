@@ -51,6 +51,12 @@ renderPlaced renderColor (Placed p c a) =
    GL.preservingMatrix $ do
       renderPlacement p
       renderColor c
+
+      -- This translation is a hack to make world coordinates refer to
+      -- the center of the position rather than its lower left
+      -- corner. Otherwise, rotations would never include the same
+      -- point.
+      GL.translate (vector3f (-1) (-1) 0)
       Primitive.render a
 
 renderPlacement (Placement p r) = do
