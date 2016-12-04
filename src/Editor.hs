@@ -71,8 +71,6 @@ placeNewParts :: [PlacedPart] -> Editor -> Editor
 placeNewParts newParts (Pick s)      = makePlace newParts s
 placeNewParts newParts (Place _ _ s) = makePlace newParts s
 
-placeNewParts newParts ed = makePlace newParts (Selector.makeSelector $ allParts ed)
-
 placeSelectedParts :: Editor -> Editor
 placeSelectedParts (Pick s) = makePlace (s ^. Selector.selected) s
 placeSelectedParts ed       = ed
@@ -92,6 +90,9 @@ ungroupSelectedParts = lselectedParts %~ concatMap Model.ungroupPart
 
 moveSelectedParts :: V3 Int -> Editor -> Editor
 moveSelectedParts v = lselectedParts.each %~ translatePart v
+
+rotateSelectedParts :: Editor -> Editor
+rotateSelectedParts = lselectedParts.each %~ Model.rotatePart (Rotation 1)
 
 escapeEdit :: Editor -> Editor
 escapeEdit (Place _ _ s) = Pick $ s

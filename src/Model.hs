@@ -23,6 +23,9 @@ data Placement = Placement { position :: !P3, rotation :: !Rotation }
 lposition :: Lens' Placement P3
 lposition = lens position (\p newPosition -> p { position = newPosition })
 
+lrotation :: Lens' Placement Rotation
+lrotation = lens rotation (\p newRotation -> p { rotation = newRotation })
+
 data Placed a = Placed !Placement !Color !a
   deriving Show
 
@@ -57,9 +60,6 @@ type PlacedPart = Tree (Placed Prim)
 translatePart :: V3 Int -> PlacedPart -> PlacedPart
 translatePart v = traversed.lplacement.lposition %~ translate v
 
-placePartAt :: P3 -> PlacedPart -> PlacedPart
-placePartAt pos = traversed.lplacement.lposition .~ pos
-
 -- | The position of the first part in the tree.
 partPosition :: PlacedPart -> P3
 partPosition (Part a)   = a ^. lplacement.lposition
@@ -79,7 +79,22 @@ getPartMinZ :: PlacedPart -> Min Int
 getPartMinZ = view (traversed.lplacement.lposition . to minZ)
    where minZ (P3 _ _ z) = Min z
 
--- TODO: rotatePart
+-- All parts in a group are rotated around the part position of the
+-- topmost group.
+--
+-- All parts not in a group are rotated around their own position
+rotatePart :: Rotation -> PlacedPart -> PlacedPart
+rotatePart r p = p & traversed %~ rotatePlaced r (partPosition p)
+
+rotatePlaced :: Rotation -> P3 -> Placed a -> Placed a
+rotatePlaced r@(Rotation n) refPoint p =
+   p & lplacement.lposition %~ rotateAroundPoint n refPoint
+     & lplacement.lrotation %~ (+r)
+
+rotateAroundPoint :: Int -> P3 -> P3 -> P3
+rotateAroundPoint r (P3 x y z) p =
+   translate v $ rotateZ r $ translate (fmap negate v) p
+   where v = Vector3 x y z
 
 --------------------------------------------------------------------------------
 -- EXAMPLE
@@ -91,10 +106,19 @@ noRotation = 0
 
 examplePart = part (Brick 2 2) (P3 0 0 0) noRotation Red
 
+exampleGroup =
+   Group
+   [ part (Brick 2 2) (P3 1 2 0) noRotation Green
+   , part (Brick 3 2) (P3 4 3 0) noRotation Green
+   , Group
+     [ part (Brick 1 1) (P3 4 6 0) noRotation Tan
+     , part (Brick 1 2) (P3 6 6 0) noRotation Tan
+     ]
+   ]
+
 example :: [PlacedPart]
 example =
    [ part (Brick 2 4) (P3 0 0 1) noRotation Red
    , part (Brick 1 2) (P3 0 5 1) noRotation Blue
-   , Group
-     [ part (Plate 6 10) (P3 0 0 0) noRotation Green ]
+   , exampleGroup
    ]
