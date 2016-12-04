@@ -35,6 +35,7 @@ cabal-version:       >=1.10
 executable main
   hs-source-dirs:      src
   main-is:             Main.hs
+  ghc-options:         -O2
   build-depends:       base >=4.9 && <4.10
                      , GLUT
                      , microlens
