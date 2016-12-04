@@ -20,3 +20,4 @@ red = Color3 1 0 0
 tan = Color3 1 0.9 0.5
 white = Color3 1 1 1
 yellow = Color3 1 1 0
+wireframe = Color3 0.2 0.2 0.2

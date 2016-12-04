@@ -1,6 +1,6 @@
 module ModelRender where
 
-import Data.Foldable (traverse_)
+import Data.Foldable (for_, traverse_)
 import Data.StateVar
 import qualified Graphics.Rendering.OpenGL as GL
 import Graphics.Rendering.OpenGL.GL.VertexArrays (Capability(..))
@@ -13,51 +13,60 @@ import qualified GLColor
 --------------------------------------------------------------------------------
 
 renderModel :: [PlacedPart] -> IO ()
-renderModel parts = do
-   -- Render part wireframe in constant color
-   GL.polygonMode $= (GL.Line, GL.Line)
-   traverse_ (renderPart $ const $ GL.color $ Color3 0.2 0.2 (0.2 :: GLfloat)) parts
-
-   -- Render part polygons
-   GL.polygonMode $= (GL.Fill, GL.Fill)
-   GL.polygonOffset $= (1,1)
-   GL.polygonOffsetFill $= Enabled
-   traverse_ (renderPart renderColor) parts
-   GL.polygonOffsetFill $= Disabled
+renderModel = traverse_ (renderPart renderPrimBrick)
 
 
 renderModelWireframe :: Foldable t => t PlacedPart -> IO ()
-renderModelWireframe parts = do
-   -- Render part wireframe in the parts color
-   GL.polygonMode $= (GL.Line, GL.Line)
-   traverse_ (renderPart renderColor) parts
+renderModelWireframe = traverse_ (renderPart renderPrimWireframe)
 
 
-type Renderer a = (Color -> IO ()) -> a -> IO ()
+type Renderer a = PrimRenderer (Color3 GLfloat) -> a -> IO ()
+type PrimRenderer color = color -> Prim -> IO ()
 
 renderWithUniqColors :: Renderer a -> [a] -> IO ()
-renderWithUniqColors render xs = do
+renderWithUniqColors renderer xs = do
    GL.polygonMode $= (GL.Fill, GL.Fill)
-   traverse_ (\(color, part) -> render (const $ GL.color color) part) (zip [zero ..] xs)
+   for_ (zip [zero ..] xs) $ \(color, part) ->
+      renderer (const $ renderPrimShape color) part
    where
       zero = toEnum 0 :: Color3 GLubyte
 
 
 renderPart :: Renderer PlacedPart
-renderPart cf = traverse_ (renderPlaced cf)
+renderPart renderer = traverse_ (renderPlaced renderer)
 
 renderPlaced :: Renderer (Placed Prim)
-renderPlaced renderColor (Placed p c a) =
+renderPlaced renderPrim (Placed p c a) =
    GL.preservingMatrix $ do
       renderPlacement p
-      renderColor c
 
       -- This translation is a hack to make world coordinates refer to
       -- the center of the position rather than its lower left
       -- corner. Otherwise, rotations would never include the same
       -- point.
       GL.translate (vector3f (-1) (-1) 0)
-      Primitive.render a
+      renderPrim (toGLColor c) a
+
+renderPrimBrick :: GL.Color c => PrimRenderer c
+renderPrimBrick color a = do
+   renderPrimWireframe GLColor.wireframe a
+   renderPrimShape color a
+
+renderPrimShape :: GL.Color c => PrimRenderer c
+renderPrimShape color a = do
+   GL.polygonMode $= (GL.Fill, GL.Fill)
+   GL.polygonOffset $= (1,1)
+   GL.polygonOffsetFill $= Enabled
+   GL.color color
+   Primitive.render a
+   GL.polygonOffsetFill $= Disabled
+
+renderPrimWireframe :: GL.Color c => PrimRenderer c
+renderPrimWireframe color a = do
+   GL.polygonMode $= (GL.Line, GL.Line)
+   GL.color color
+   Primitive.render a
+
 
 renderPlacement (Placement p r) = do
    renderPosition p
@@ -68,8 +77,8 @@ renderPosition (P3 x y z) =
 
 renderRotation (Rotation r) = GL.rotate (90 * fromIntegral r) (vector3f 0 0 1)
 
-renderColor :: Color -> IO ()
-renderColor = GL.color . go
+toGLColor :: Color -> Color3 GLfloat
+toGLColor = go
    where
       go Black     = GLColor.black
       go Blue      = GLColor.blue
