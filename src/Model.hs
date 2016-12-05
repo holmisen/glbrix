@@ -17,6 +17,11 @@ import Lens.Micro.Extras (view)
 
 newtype Rotation = Rotation Int deriving (Eq, Num, Ord, Show)
 
+noRotation :: Rotation
+noRotation = 0
+
+--------------------------------------------------------------------------------
+
 data Placement = Placement { position :: !P3, rotation :: !Rotation }
   deriving (Eq, Show)
 
@@ -25,6 +30,8 @@ lposition = lens position (\p newPosition -> p { position = newPosition })
 
 lrotation :: Lens' Placement Rotation
 lrotation = lens rotation (\p newRotation -> p { rotation = newRotation })
+
+--------------------------------------------------------------------------------
 
 data Placed a = Placed !Placement !Color !a
   deriving Show
@@ -38,6 +45,13 @@ lcolor = lens (\(Placed _ c _) -> c) (\(Placed p _ a) c -> Placed p c a)
 lplacedValue :: Lens' (Placed a) a
 lplacedValue = lens (\(Placed _ _ a) -> a) (\(Placed p c _) a -> Placed p c a)
 
+rotatePlaced :: Rotation -> P3 -> Placed a -> Placed a
+rotatePlaced r@(Rotation n) refPoint p =
+   p & lplacement.lposition %~ rotateAroundPoint n refPoint
+     & lplacement.lrotation %~ (+r)
+
+--------------------------------------------------------------------------------
+
 data Tree a = Part a
             | Group [Tree a]
   deriving (Foldable, Functor, Show, Traversable)
@@ -50,7 +64,7 @@ ungroupTree (Group ns) = ns
 ungroupTree n          = [n]
 
 flattenPartTree :: Tree a -> [a]
-flattenPartTree (Part a) = [a]
+flattenPartTree (Part a)   = [a]
 flattenPartTree (Group ts) = concatMap flattenPartTree ts
 
 --------------------------------------------------------------------------------
@@ -86,14 +100,11 @@ getPartMinZ = view (traversed.lplacement.lposition . to minZ)
 rotatePart :: Rotation -> PlacedPart -> PlacedPart
 rotatePart r p = p & traversed %~ rotatePlaced r (partPosition p)
 
-rotatePlaced :: Rotation -> P3 -> Placed a -> Placed a
-rotatePlaced r@(Rotation n) refPoint p =
-   p & lplacement.lposition %~ rotateAroundPoint n refPoint
-     & lplacement.lrotation %~ (+r)
+--------------------------------------------------------------------------------
 
 rotateAroundPoint :: Int -> P3 -> P3 -> P3
-rotateAroundPoint r (P3 x y z) p =
-   translate v $ rotateZ r $ translate (fmap negate v) p
+rotateAroundPoint r (P3 x y z) =
+   translate v . rotateZ r . translate (fmap negate v)
    where v = Vector3 x y z
 
 --------------------------------------------------------------------------------
@@ -101,8 +112,6 @@ rotateAroundPoint r (P3 x y z) p =
 
 part :: Prim -> P3 -> Rotation -> Color -> PlacedPart
 part prim pos rot col = Part $ Placed (Placement pos rot) col prim
-
-noRotation = 0
 
 examplePart = part (Brick 2 2) (P3 0 0 0) noRotation Red
 
