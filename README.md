@@ -36,13 +36,13 @@ and you will get a binary.
 
 # Usage
 
-`Left click` to place part or select/deselect part.
+  * `Left click` to place part or select/deselect part.
 
-`Mouse wheel` to zoom in/out.
+  * `Mouse wheel` to zoom in/out.
 
-`Right mouse btn + move` to rotate camera.
+  * `Right mouse btn + move` to rotate camera.
 
-`Arrow keys` moves selected parts one step in each direction.
+  * `Arrow keys` moves selected parts one step in each direction.
 
 
 ## Commands
@@ -63,11 +63,13 @@ below.
 
   * `G` ungroup selected parts.
 
+  * `x` delete selected parts.
+
   * `[ESC]` to abort the current edit operation and clear the command buffer.
 
   * `[SPACEBAR]` to clone selected parts.
 
-Example:
+**Example:**
 
 Typing `b4x2` will insert a new brick of 4x2 dimension
 
