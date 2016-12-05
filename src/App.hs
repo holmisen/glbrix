@@ -23,9 +23,9 @@ data ProjectionType = Ortho
 
 data App =
   App
-  { _appCamera     :: IORef Camera
-  , _appProjection :: ProjectionType
-  , _appEditor     :: IORef Editor
+  { _appCamera       :: IORef Camera
+  , _appProjection   :: ProjectionType
+  , _appEditor       :: IORef Editor
   , _appCurrentColor :: IORef Types.Color
   }
 
@@ -34,9 +34,9 @@ makeLenses ''App
 
 newDefaultApp :: IO App
 newDefaultApp = do
-   cam <- newIORef defaultCamera
-   editor <- newIORef $ startEditor
-   color <- newIORef $ Types.Tan
+   cam    <- newIORef defaultCamera
+   editor <- newIORef startEditor
+   color  <- newIORef Types.Tan
    return App
       { _appCamera = cam
       , _appProjection = Ortho
