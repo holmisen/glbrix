@@ -7,7 +7,7 @@ editor for such bricks in particular.
 For now it is in prototype stage, so it is very much under
 construction.
 
-[Under construction](pics/build.png)
+![Under construction](pics/build.png)
 
 The picture is a screenshot from a model built with this program.
 
