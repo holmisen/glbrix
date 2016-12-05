@@ -17,6 +17,7 @@ data Camera =
 
 makeLenses ''Camera
 
+defaultCamera :: Camera
 defaultCamera =
   Polar { _camDistance = 50
         , _camElevation = 30
@@ -24,16 +25,7 @@ defaultCamera =
         }
 
 
--- _camAzimuth :: Lens' Camera GLdouble
--- _camAzimuth = lens camAzimuth (\s x -> s { camAzimuth = x })
-
--- _camElevation :: Lens' Camera GLdouble
--- _camElevation = lens camElevation (\s x -> s { camElevation = x })
-
--- _camDistance :: Lens' Camera GLdouble
--- _camDistance = lens camDistance (\s x -> s { camDistance = x })
-
-
+applyCamera :: Camera -> IO ()
 applyCamera (Polar azimuth elevation distance) = do
   GL.loadIdentity
   polarView distance elevation azimuth
