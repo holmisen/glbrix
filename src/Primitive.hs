@@ -17,12 +17,17 @@ data Prim
    | Plate Int Int
    deriving (Eq, Ord, Show)
 
+height :: Num t => Prim -> t
 height (Brick {}) = 3
 height (Plate {}) = 1
 
+render :: Prim -> IO ()
 render (Brick l w) = renderBeam (2 * fromIntegral l) (2 * fromIntegral w) (fromIntegral 3)
 render (Plate l w) = renderBeam (2 * fromIntegral l) (2 * fromIntegral w) (fromIntegral 1)
 
+-- | Render primitive without any details. For now defined as
+-- 'render', but might change.
+renderShape :: Prim -> IO ()
 renderShape = render
 
 renderRect :: Double -> Double -> IO ()
@@ -62,7 +67,6 @@ renderBeam l w h = do
       translated (Vector3 w 0 h)
       rotated 90 (Vector3 0 1 0)
       renderRect l h
-
 
 --------------------------------------------------------------------------------
 
