@@ -2,8 +2,8 @@ module ModelRender where
 
 import Data.Foldable (for_, traverse_)
 import Data.StateVar
-import qualified Graphics.Rendering.OpenGL as GL
 import Graphics.Rendering.OpenGL.GL.VertexArrays (Capability(..))
+import qualified Graphics.Rendering.OpenGL as GL
 
 import Model
 import Primitive
@@ -19,8 +19,7 @@ renderModelWireframe :: Foldable t => t PlacedPart -> IO ()
 renderModelWireframe = traverse_ (renderPart renderPrimWireframe)
 
 renderWithUniqColors :: Renderer a -> [a] -> IO ()
-renderWithUniqColors renderer xs = do
-   GL.polygonMode $= (GL.Fill, GL.Fill)
+renderWithUniqColors renderer xs =
    for_ (zip [zero ..] xs) $ \(color, part) ->
       renderer (const $ renderPrimShape color) part
    where
