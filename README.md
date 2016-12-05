@@ -16,7 +16,7 @@ The picture is a screenshot from a model built with this program.
 
 You need OpenGL and GLUT.
 
-You also need the stack tool [stack](haskellstack.org) to build this.
+You also need the [stack](www.haskellstack.org) tool to build this.
   
 Clone this project and enter the project dir.
 
