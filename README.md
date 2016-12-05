@@ -17,7 +17,7 @@ The picture is a screenshot from a model built with this program.
 You need OpenGL and GLUT.
 
 You also need the [stack](http://www.haskellstack.org) tool to build this.
-  
+
 Clone this project and enter the project dir.
 
 Then run this to build and then run program:
@@ -58,6 +58,10 @@ below.
   * `c <color>` to change current color. Available colors are listed below.
 
   * `r` rotate selected parts 90 degrees.
+
+  * `g` group selected parts.
+
+  * `G` ungroup selected parts.
 
   * `[ESC]` to abort the current edit operation and clear the command buffer.
 
