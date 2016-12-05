@@ -40,33 +40,37 @@ renderRect l w =
 
 renderBeam :: Double -> Double -> Double -> IO ()
 renderBeam l w h = do
-   -- upper:
-   GL.preservingMatrix $ do
-      translated (Vector3 0 0 h)
-      renderRect l w
-   -- lower:
-   GL.preservingMatrix $ do
-      translated (Vector3 0 l 0)
-      rotated 180 (Vector3 1 0 0)
-      renderRect l w
-   -- front:
-   GL.preservingMatrix $ do
-      rotated 90 (Vector3 1 0 0)
-      renderRect h w
-   -- back:
-   GL.preservingMatrix $ do
-      translated (Vector3 0 l h)
-      rotated (-90) (Vector3 1 0 0)
-      renderRect h w
-   -- left:
-   GL.preservingMatrix $ do
-      rotated (-90) (Vector3 0 1 0)
-      renderRect l h
-   -- right:
-   GL.preservingMatrix $ do
-      translated (Vector3 w 0 h)
-      rotated 90 (Vector3 0 1 0)
-      renderRect l h
+   GL.renderPrimitive GL.Quads $ do
+      -- upper:
+      GL.vertex $ vx3d 0 0 h
+      GL.vertex $ vx3d w 0 h
+      GL.vertex $ vx3d w l h
+      GL.vertex $ vx3d 0 l h
+      -- lower:
+      GL.vertex $ vx3d 0 0 0
+      GL.vertex $ vx3d 0 l 0
+      GL.vertex $ vx3d w l 0
+      GL.vertex $ vx3d w 0 0
+      -- front:
+      GL.vertex $ vx3d 0 0 0
+      GL.vertex $ vx3d w 0 0
+      GL.vertex $ vx3d w 0 h
+      GL.vertex $ vx3d 0 0 h
+      -- back:
+      GL.vertex $ vx3d 0 l 0
+      GL.vertex $ vx3d 0 l h
+      GL.vertex $ vx3d w l h
+      GL.vertex $ vx3d w l 0
+      -- left:
+      GL.vertex $ vx3d 0 0 0
+      GL.vertex $ vx3d 0 0 h
+      GL.vertex $ vx3d 0 l h
+      GL.vertex $ vx3d 0 l 0
+      -- right:
+      GL.vertex $ vx3d w 0 0
+      GL.vertex $ vx3d w l 0
+      GL.vertex $ vx3d w l h
+      GL.vertex $ vx3d w 0 h
 
 --------------------------------------------------------------------------------
 
