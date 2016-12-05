@@ -15,13 +15,8 @@ import qualified GLColor
 renderModel :: [PlacedPart] -> IO ()
 renderModel = traverse_ (renderPart renderPrimBrick)
 
-
 renderModelWireframe :: Foldable t => t PlacedPart -> IO ()
 renderModelWireframe = traverse_ (renderPart renderPrimWireframe)
-
-
-type Renderer a = PrimRenderer (Color3 GLfloat) -> a -> IO ()
-type PrimRenderer color = color -> Prim -> IO ()
 
 renderWithUniqColors :: Renderer a -> [a] -> IO ()
 renderWithUniqColors renderer xs = do
@@ -31,6 +26,9 @@ renderWithUniqColors renderer xs = do
    where
       zero = toEnum 0 :: Color3 GLubyte
 
+--------------------------------------------------------------------------------
+
+type Renderer a = PrimRenderer (Color3 GLfloat) -> a -> IO ()
 
 renderPart :: Renderer PlacedPart
 renderPart renderer = traverse_ (renderPlaced renderer)
@@ -46,6 +44,10 @@ renderPlaced renderPrim (Placed p c a) =
       -- point.
       GL.translate (vector3f (-1) (-1) 0)
       renderPrim (toGLColor c) a
+
+--------------------------------------------------------------------------------
+
+type PrimRenderer color = color -> Prim -> IO ()
 
 renderPrimBrick :: GL.Color c => PrimRenderer c
 renderPrimBrick color a = do
@@ -67,38 +69,43 @@ renderPrimWireframe color a = do
    GL.color color
    Primitive.render a
 
+--------------------------------------------------------------------------------
 
+renderPlacement :: Placement -> IO ()
 renderPlacement (Placement p r) = do
    renderPosition p
    renderRotation r
 
+renderPosition :: P3 -> IO ()
 renderPosition (P3 x y z) =
    GL.translate (vector3f (2 * fromIntegral x) (2 * fromIntegral y) (fromIntegral z))
 
+renderRotation :: Rotation -> IO ()
 renderRotation (Rotation r) = GL.rotate (90 * fromIntegral r) (vector3f 0 0 1)
 
+--------------------------------------------------------------------------------
+
 toGLColor :: Color -> Color3 GLfloat
-toGLColor = go
-   where
-      go Black     = GLColor.black
-      go Blue      = GLColor.blue
-      go Brown     = GLColor.brown
-      go DarkBlue  = GLColor.darkBlue
-      go DarkGray  = GLColor.darkGray
-      go DarkGreen = GLColor.darkGreen
-      go Gray      = GLColor.gray
-      go Green     = GLColor.green
-      go LightBlue = GLColor.lightBlue
-      go Red       = GLColor.red
-      go Tan       = GLColor.tan
-      go White     = GLColor.white
-      go Yellow    = GLColor.yellow
+toGLColor Black     = GLColor.black
+toGLColor Blue      = GLColor.blue
+toGLColor Brown     = GLColor.brown
+toGLColor DarkBlue  = GLColor.darkBlue
+toGLColor DarkGray  = GLColor.darkGray
+toGLColor DarkGreen = GLColor.darkGreen
+toGLColor Gray      = GLColor.gray
+toGLColor Green     = GLColor.green
+toGLColor LightBlue = GLColor.lightBlue
+toGLColor Red       = GLColor.red
+toGLColor Tan       = GLColor.tan
+toGLColor White     = GLColor.white
+toGLColor Yellow    = GLColor.yellow
 
 --------------------------------------------------------------------------------
 
 vector3f x y z = Vector3 x y z :: Vector3 GLdouble
 vertex3f x y z = Vertex3 x y z :: Vertex3 GLdouble
 
+renderAxis :: GLdouble -> IO ()
 renderAxis s =
   GL.renderPrimitive GL.Lines $ do
     GL.color (Color3 1 0 0 :: Color3 GLfloat)
