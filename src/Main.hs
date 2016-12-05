@@ -78,7 +78,7 @@ main = do
   GLUT.keyboardCallback $=
      (Just $ \char mousePos -> do
            case char of
-              '\b'   -> keysRef $~ safeTail
+              '\b'   -> keysRef $~ drop 1
               '\ESC' -> do
                  keysRef $= []
                  _appEditor app $~ Editor.escapeEdit
@@ -158,8 +158,9 @@ display app = do
 
   GLUT.swapBuffers
 
-
+--------------------------------------------------------------------------------
 handleMouse :: App -> MouseCallback
+
 handleMouse app LeftButton Down mousePos = do
   applyCamera =<< get (_appCamera app)
 
@@ -192,6 +193,7 @@ handleMouse app WheelDown Down mousePos = do
 handleMouse _ _ _ _ =
   return ()
 
+--------------------------------------------------------------------------------
 
 handleMouseMove :: App -> MotionCallback
 handleMouseMove app mousePos = do
@@ -205,6 +207,7 @@ handleMouseMove app mousePos = do
       _other ->
          return ()
 
+--------------------------------------------------------------------------------
 
 -- | Return the index of the placed part under given position, or
 -- Nothing if there is no part under position.
@@ -238,7 +241,7 @@ pickPart renderer pos parts = do
 
   color <- getColorAtPosition pos
   let partIndex = if color < maxBound then Just (fromEnum $ looseAlpha color) else Nothing
-  putStrLn $ show pos ++ "\t" ++ show color ++ "\t (part " ++ show partIndex ++ ")"
+  logInfo $ show pos ++ "\t" ++ show color ++ "\t (part " ++ show partIndex ++ ")"
   return partIndex
 
 
@@ -268,6 +271,3 @@ getColorAtPosition pos@(Position posX posY) = do
 
 looseAlpha :: Color4 a -> Color3 a
 looseAlpha (Color4 r g b a) = Color3 r g b
-
-safeTail [] = []
-safeTail xs = tail xs
