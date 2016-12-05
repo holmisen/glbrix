@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 module Editor where
@@ -9,6 +10,7 @@ import Types
 import qualified Selector
 
 import Data.Foldable
+import Data.List.NonEmpty (NonEmpty((:|)))
 import Data.Semigroup
 import Lens.Micro
 import Lens.Micro.Extras (view)
@@ -83,7 +85,9 @@ cloneSelectedParts ed =
    makePlace (ed ^. lselectedParts) (Selector.makeSelector $ allParts ed)
 
 groupSelectedParts :: Editor -> Editor
-groupSelectedParts = lselectedParts %~ pure . Model.groupParts
+groupSelectedParts = lselectedParts %~ \case
+   (p : ps)  -> [Model.groupParts (p :| ps)]
+   otherwise -> []
 
 ungroupSelectedParts :: Editor -> Editor
 ungroupSelectedParts = lselectedParts %~ concatMap Model.ungroupPart

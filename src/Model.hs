@@ -8,7 +8,8 @@ module Model where
 import Primitive
 import Types
 
-import Data.Foldable (traverse_)
+import Data.Foldable      (toList, traverse_)
+import Data.List.NonEmpty (NonEmpty)
 import Data.Semigroup
 import Lens.Micro
 import Lens.Micro.Extras (view)
@@ -82,8 +83,8 @@ partPosition (Group ps) = partPosition (head ps)
 setPartColor :: Color -> PlacedPart -> PlacedPart
 setPartColor c = traversed.lcolor .~ c
 
-groupParts :: [PlacedPart] -> PlacedPart
-groupParts = groupTrees
+groupParts :: NonEmpty PlacedPart -> PlacedPart
+groupParts = groupTrees . toList
 
 ungroupPart :: PlacedPart -> [PlacedPart]
 ungroupPart = ungroupTree
