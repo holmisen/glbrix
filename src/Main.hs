@@ -173,7 +173,6 @@ handleMouse app LeftButton Down mousePos = do
      Pick {} -> do
         let placed = editor ^. lnonSelectedParts
         partMaybe <- pickPlacedPart mousePos (Editor.allParts editor)
-        logInfo $ "Pick placed part: " ++ show partMaybe
         case partMaybe of
            Nothing ->
               _appEditor app $= Editor.unselectAll editor
