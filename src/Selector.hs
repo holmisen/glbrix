@@ -5,10 +5,18 @@
 
 module Selector
  ( Selector
+
+ -- * Constructor
  , makeSelector
+
+ -- * Lenses
  , selected
  , nonSelected
+
+ -- * Query
  , hasSelected
+
+ -- * Operations
  , select
  , unselectAll
  )
@@ -26,6 +34,7 @@ data Selector a = Selector { _selected    :: [a]
 
 makeLenses ''Selector
 
+makeSelector :: [a] -> Selector a
 makeSelector elements = Selector { _selected = [], _nonSelected = elements }
 
 
@@ -58,21 +67,6 @@ moveElement i from to s =
      & to %~ (p ++)
    where
       (p, rest) = pick i (view from s)
-
-
--- renderSelector :: Selector -> IO ()
--- renderSelector scene
---    | hasSelected scene = do
---         -- Render unselected
---         GL.polygonMode $= (GL.Line, GL.Line)
---         mapM_ renderModel (view nonSelected scene)
-
---         -- Render selected
---         GL.polygonMode $= (GL.Fill, GL.Fill)
---         mapM_ renderModel (view selectedParts scene)
-
---    | otherwise = do
---         mapM_ renderModel (allSelectorParts scene)
 
 --------------------------------------------------------------------------------
 
