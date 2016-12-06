@@ -15,15 +15,18 @@ import Graphics.Rendering.OpenGL as GL
 data Prim
    = Brick Int Int
    | Plate Int Int
+   | Block Int Int Int
    deriving (Eq, Ord, Show)
 
-height :: Num t => Prim -> t
-height (Brick {}) = 3
-height (Plate {}) = 1
+height :: Prim -> Int
+height (Brick {})    = 3
+height (Plate {})    = 1
+height (Block _ _ h) = 3*h
 
 render :: Prim -> IO ()
-render (Brick l w) = renderBeam (2 * fromIntegral l) (2 * fromIntegral w) (fromIntegral 3)
-render (Plate l w) = renderBeam (2 * fromIntegral l) (2 * fromIntegral w) (fromIntegral 1)
+render (Block l w h) = renderBeam (2 * fromIntegral l) (2 * fromIntegral w) (fromIntegral (3*h))
+render (Plate l w)   = renderBeam (2 * fromIntegral l) (2 * fromIntegral w) (fromIntegral 1)
+render (Brick l w)   = renderBeam (2 * fromIntegral l) (2 * fromIntegral w) (fromIntegral 3)
 
 -- | Render primitive without any details. For now defined as
 -- 'render', but might change.

@@ -227,7 +227,7 @@ pickPlacedPrim pos parts = do
             P3 _ _ z = placed ^. (lplacement.lposition)
             prim     = placed ^. lplacedValue
          in
-            return $ fromIntegral z + Primitive.height prim
+            return $ fromIntegral (z + Primitive.height prim)
 
 
 pickPart :: Renderer a -> Position -> [a] -> IO (Maybe Int)

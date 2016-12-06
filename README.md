@@ -55,6 +55,8 @@ below.
 
   * `b <length> x <width>` insert a new brick.
 
+  * `B <length> x <width> x <height>` insert a new block.
+
   * `c <color>` change current color. Available colors are listed below.
 
   * `r` rotate selected parts 90 degrees.

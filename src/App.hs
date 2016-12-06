@@ -57,13 +57,15 @@ startEditor = Editor.placeNewParts [startBrick] $ Editor.makeEditor [startPlate]
 execCommand :: App -> Command -> IO ()
 execCommand app cmd = do
    color <- get (_appCurrentColor app)
+   let newPart p = part p origo noRotation color
    case cmd of
+      CmdBlock l w h
+         | h == 0    -> insert $ newPart (Plate l w)
+         | otherwise -> insert $ newPart (Block l w h)
       CmdPlate l w ->
-         let plate = part (Plate l w) (P3 0 0 0) noRotation color
-         in _appEditor app $~ Editor.placeNewParts [plate]
+         insert $ newPart (Plate l w)
       CmdBrick l w ->
-         let brick = part (Brick l w) (P3 0 0 0) noRotation color
-         in _appEditor app $~ Editor.placeNewParts [brick]
+         insert $ newPart (Brick l w)
       CmdColor c -> do
          _appCurrentColor app $= c
          _appEditor app $~ Editor.setSelectedPartsColor c
@@ -80,3 +82,5 @@ execCommand app cmd = do
          _appEditor app $~ Editor.ungroupSelectedParts
       CmdRotate ->
          _appEditor app $~ Editor.rotateSelectedParts
+   where
+      insert part = _appEditor app $~ Editor.placeNewParts [part]

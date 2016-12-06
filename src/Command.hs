@@ -13,8 +13,9 @@ import Types (Color(..))
 
 data Command
    = CmdColor Color
-   | CmdPlate Int Int
+   | CmdBlock Int Int Int
    | CmdBrick Int Int
+   | CmdPlate Int Int
    | CmdClone
    | CmdDelete
    | CmdMove
@@ -26,7 +27,18 @@ data Command
 readCommand :: [Char] -> Maybe Command
 readCommand = fmap fst . listToMaybe . readP_to_S (command <* eof)
 
-command = P.choice [ cmdColor, cmdPlate, cmdBrick, cmdClone, cmdDelete, cmdMove, cmdGroup, cmdUngroup, cmdRotate ]
+command = P.choice
+  [ cmdColor
+  , cmdBlock
+  , cmdBrick
+  , cmdPlate
+  , cmdClone
+  , cmdDelete
+  , cmdMove
+  , cmdGroup
+  , cmdUngroup
+  , cmdRotate
+  ]
 
 cmdColor = do
    P.char 'c'
@@ -55,6 +67,10 @@ cmdPlate = do
 cmdBrick = do
    P.char 'b'
    CmdBrick <$> (int <* char 'x') <*> int
+
+cmdBlock = do
+   P.char 'B'
+   CmdBlock <$> (int <* char 'x') <*> (int <* char 'x') <*> int
 
 cmdClone = const CmdClone <$> P.char ' '
 
