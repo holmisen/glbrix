@@ -125,16 +125,16 @@ reshape app (Size w h) = do
   let w' = fromIntegral w
   let h' = fromIntegral h
 
-  let w_model = 50
-  let scale   = w_model / w'
-  let h_model = h' * scale
+  let h_model = 25
+  let scale   = h_model / h'
+  let w_model = w' * scale
 
   let w2 = w_model / 2
   let h2 = h_model / 2
 
 --  GL.ortho (-w2) w2 (-h2) h2 1 500
 
-  GL.frustum (-w2) w2 (-h2) h2 20 200
+  GL.frustum (-w2) w2 (-h2) h2 20 400
 
   GL.matrixMode $= Modelview 0
 
