@@ -51,11 +51,11 @@ Currently there is no GUI components except the editor, so you need to
 enter commands by keyboard. The available commands are listed
 below.
 
-  * `p <width> x <height>` to insert a new plate.
+  * `p <length> x <width>` insert a new plate.
 
-  * `b <width> x <height>` to insert a new brick.
+  * `b <length> x <width>` insert a new brick.
 
-  * `c <color>` to change current color. Available colors are listed below.
+  * `c <color>` change current color. Available colors are listed below.
 
   * `r` rotate selected parts 90 degrees.
 
@@ -65,9 +65,9 @@ below.
 
   * `x` delete selected parts.
 
-  * `[ESC]` to abort the current edit operation and clear the command buffer.
+  * `[ESC]` abort the current edit operation and clear the command buffer.
 
-  * `[SPACEBAR]` to clone selected parts.
+  * `[SPACEBAR]` clone selected parts.
 
 **Example:**
 
