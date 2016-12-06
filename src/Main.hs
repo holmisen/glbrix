@@ -85,7 +85,8 @@ main = do
                  GLUT.postRedisplay Nothing
               '?' -> do
                  editor <- get (_appEditor app)
-                 logInfo $ "Number of parts: " ++ show (length $ allParts editor)
+                 let n = length $ concatMap flattenPartTree $ allParts editor
+                 logInfo $ "Number of pieces: " ++ show n
               _ -> do
                  keysRef $~ (char :)
                  keys <- get keysRef
@@ -134,7 +135,7 @@ reshape app (Size w h) = do
 
 --  GL.ortho (-w2) w2 (-h2) h2 1 500
 
-  GL.frustum (-w2) w2 (-h2) h2 20 400
+  GL.frustum (-w2) w2 (-h2) h2 20 800
 
   GL.matrixMode $= Modelview 0
 
