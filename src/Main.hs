@@ -83,6 +83,9 @@ main = do
                  keysRef $= []
                  _appEditor app $~ Editor.escapeEdit
                  GLUT.postRedisplay Nothing
+              '?' -> do
+                 editor <- get (_appEditor app)
+                 logInfo $ "Number of parts: " ++ show (length $ allParts editor)
               _ -> do
                  keysRef $~ (char :)
                  keys <- get keysRef
