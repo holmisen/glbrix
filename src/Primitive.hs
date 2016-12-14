@@ -25,8 +25,8 @@ height (Block _ _ h) = 3*h
 
 render :: Prim -> IO ()
 render (Block l w h) = renderBeam (2 * fromIntegral l) (2 * fromIntegral w) (fromIntegral (3*h))
-render (Plate l w)   = renderBeam (2 * fromIntegral l) (2 * fromIntegral w) (fromIntegral 1)
-render (Brick l w)   = renderBeam (2 * fromIntegral l) (2 * fromIntegral w) (fromIntegral 3)
+render (Plate l w)   = renderBeam (2 * fromIntegral l) (2 * fromIntegral w) 1
+render (Brick l w)   = renderBeam (2 * fromIntegral l) (2 * fromIntegral w) 3
 
 -- | Render primitive without any details. For now defined as
 -- 'render', but might change.
