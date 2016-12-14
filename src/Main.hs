@@ -19,9 +19,15 @@ import Primitive (Prim)
 import Types
 import qualified Primitive
 
+--------------------------------------------------------------------------------
+
 logInfo = putStrLn
 
+backgroundColor = Color4 0.64 0.8 1.0 1
 
+--------------------------------------------------------------------------------
+
+main :: IO ()
 main = do
   GLUT.getArgsAndInitialize
 
@@ -142,13 +148,11 @@ reshape app (Size w h) = do
 
 display :: App -> IO ()
 display app = do
-  GL.clearColor $= Color4 0.64 0.8 1 1
+  GL.clearColor $= backgroundColor
 
   GL.clear [GL.ColorBuffer, GL.DepthBuffer]
 
   applyCamera =<< get (_appCamera app)
-
---  GL.currentColor $= Color3 1 0 0
 
   GL.cullFace $= Just (GL.Back)
 
@@ -156,11 +160,29 @@ display app = do
 
   renderAxis 2
 
-  -- Visible
-  renderModel          $ editor ^. lnonSelectedParts
+  renderModel $ editor ^. lnonSelectedParts
+
+  -- Render "invisible" plane for picking
+  renderBackgroundPlane (-500, -500) (500, 500)
+
+  -- TODO: Save the depth buffer at this point for later picking
+
   renderModelWireframe $ editor ^. lselectedParts
 
   GLUT.swapBuffers
+
+
+renderBackgroundPlane :: (GLint, GLint) -> (GLint, GLint) -> IO ()
+renderBackgroundPlane (xMin, yMin) (xMax, yMax) = do
+   GL.color backgroundColor
+   GL.polygonMode $= (GL.Fill, GL.Fill)
+   GL.polygonOffsetFill $= Enabled
+   GL.renderPrimitive GL.Quads $ do
+      GL.vertex $ GL.Vertex2 xMin yMin
+      GL.vertex $ GL.Vertex2 xMax yMin
+      GL.vertex $ GL.Vertex2 xMax yMax
+      GL.vertex $ GL.Vertex2 xMin yMax
+   GL.polygonOffsetFill $= Disabled
 
 --------------------------------------------------------------------------------
 handleMouse :: App -> MouseCallback
