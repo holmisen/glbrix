@@ -217,22 +217,6 @@ handleMouseMove app mousePos = do
 pickPlacedPart :: Position -> [PlacedPart] -> IO (Maybe Int)
 pickPlacedPart = pickPart ModelRender.renderPart
 
--- | Return the z position of the top of the part under given position
--- or 0 if there is no part under position.
-pickPlacedPrim :: Position -> [PlacedPart] -> IO Double
-pickPlacedPrim pos parts = do
-   let prims = concatMap flattenPartTree parts
-   index <- pickPart renderPlaced pos prims
-   case index of
-      Nothing -> return 0
-      Just i  ->
-         let
-            placed   = prims !! i
-            P3 _ _ z = placed ^. (lplacement.lposition)
-            prim     = placed ^. lplacedValue
-         in
-            return $ fromIntegral (z + Primitive.height prim)
-
 
 pickPart :: Renderer a -> Position -> [a] -> IO (Maybe Int)
 pickPart renderer pos parts = do
