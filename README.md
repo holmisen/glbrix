@@ -1,8 +1,8 @@
 # GLBRIX
 
-This program is an editor for 3-dimensional bricks. The bricks are
-inspired by LEGO bricks, but the aim of this project is not to be an
-editor for such bricks in particular.
+This program is an editor for models built by 3-dimensional primitives
+(bricks). The bricks are inspired by LEGO bricks, but the aim of this
+project is not to be an editor for such bricks in particular.
 
 For now it is in prototype stage, so it is very much under
 construction.
