@@ -19,7 +19,7 @@ makeLenses ''Camera
 
 defaultCamera :: Camera
 defaultCamera =
-  Polar { _camDistance = 50
+  Polar { _camDistance = 60
         , _camElevation = 30
         , _camAzimuth = 0
         }
