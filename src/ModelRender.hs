@@ -40,7 +40,7 @@ renderPlaced renderPrim (Placed p c a) =
       -- This translation is a hack to make world coordinates refer to
       -- the center of the position rather than its lower left
       -- corner. Otherwise, rotations would never include the same
-      -- point.
+      -- position.
       GL.translate (vector3f (-1) (-1) 0)
       renderPrim (toGLColor c) a
 
