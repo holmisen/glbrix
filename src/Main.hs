@@ -68,8 +68,11 @@ main = do
               Nothing -> return ()
               Just (Position x' y') -> do
                  cam <- get camRef
-                 let dx = fromIntegral (x - x')
-                 let dy = fromIntegral (y - y')
+
+                 -- arbitrary factor to make motion less sensitive
+                 let dx = 0.5 * fromIntegral (x - x')
+                 let dy = 0.5 * fromIntegral (y - y')
+
                  let newCam = ((camElevation %~ \e -> e - dy) .
                                (camAzimuth   %~ \a -> a + dx)) cam
                  _appCamera app $=! newCam
