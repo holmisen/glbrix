@@ -50,17 +50,6 @@ main = do
   camRef   <- newIORef (undefined :: Camera)
   keysRef  <- newIORef []
 
-  GLUT.mouseCallback $=
-     (Just $ \ btn keyState p -> do
-           when (btn == RightButton) $
-              case keyState of
-                 Down -> do
-                    mousePos $=! Just p
-                    (camRef $=!) =<< get (_appCamera app)
-                 Up ->
-                    mousePos $=! Nothing
-           handleMouse app btn keyState p)
-
   GLUT.motionCallback $=
      (Just $ \(Position x y) -> do
            refPosition <- get mousePos
@@ -82,6 +71,17 @@ main = do
   GLUT.passiveMotionCallback $= Just (handleMouseMove app)
 
 
+  GLUT.mouseCallback $=
+     (Just $ \ btn keyState p -> do
+           when (btn == RightButton) $
+              case keyState of
+                 Down -> do
+                    mousePos $=! Just p
+                    (camRef $=!) =<< get (_appCamera app)
+                 Up ->
+                    mousePos $=! Nothing
+           handleMouse app btn keyState p)
+
   -- When keys are pressed, their characters are accumulated into
   -- commands than can be executed.
   GLUT.keyboardCallback $=
@@ -91,6 +91,11 @@ main = do
               '\ESC' -> do
                  keysRef $= []
                  _appEditor app $~ Editor.escapeEdit
+                 GLUT.postRedisplay Nothing
+              '\r' -> do
+                 -- When RETURN is pressed, just place parts
+                 keysRef $= []
+                 _appEditor app $~ Editor.placeParts
                  GLUT.postRedisplay Nothing
               '?' -> do
                  editor <- get (_appEditor app)
