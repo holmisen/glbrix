@@ -46,13 +46,13 @@ main = do
 
   GLUT.displayCallback $= display app
 
-  mousePos <- newIORef Nothing
-  camRef   <- newIORef (undefined :: Camera)
-  keysRef  <- newIORef []
+  mousePosRef <- newIORef Nothing
+  camRef      <- newIORef (undefined :: Camera)
+  keysRef     <- newIORef []
 
   GLUT.motionCallback $=
      (Just $ \(Position x y) -> do
-           refPosition <- get mousePos
+           refPosition <- get mousePosRef
            case refPosition of
               Nothing -> return ()
               Just (Position x' y') -> do
@@ -70,61 +70,65 @@ main = do
 
   GLUT.passiveMotionCallback $= Just (handleMouseMove app)
 
+  GLUT.keyboardMouseCallback $= Just
+     (\ key keyState modifiers mousePos ->
+         case key of
+            MouseButton btn -> do
+               when (btn == RightButton) $
+                  case keyState of
+                     Down -> do
+                        mousePosRef $=! Just mousePos
+                        (camRef $=!) =<< get (_appCamera app)
+                     Up ->
+                        mousePosRef $=! Nothing
+               handleMouse app btn keyState mousePos
 
-  GLUT.mouseCallback $=
-     (Just $ \ btn keyState p -> do
-           when (btn == RightButton) $
-              case keyState of
-                 Down -> do
-                    mousePos $=! Just p
-                    (camRef $=!) =<< get (_appCamera app)
-                 Up ->
-                    mousePos $=! Nothing
-           handleMouse app btn keyState p)
+            SpecialKey key | keyState == Down -> do
+               case key of
+                  KeyUp    -> _appEditor app $~ Editor.moveSelectedParts (Vector3   0   1  0)
+                  KeyDown  -> _appEditor app $~ Editor.moveSelectedParts (Vector3   0 (-1) 0)
+                  KeyLeft  -> _appEditor app $~ Editor.moveSelectedParts (Vector3 (-1)  0  0)
+                  KeyRight -> _appEditor app $~ Editor.moveSelectedParts (Vector3   1   0  0)
+                  otherwise -> return ()
+               GLUT.postRedisplay Nothing
 
-  -- When keys are pressed, their characters are accumulated into
-  -- commands than can be executed.
-  GLUT.keyboardCallback $=
-     (Just $ \char mousePos -> do
-           case char of
-              '\b'   -> keysRef $~ drop 1
-              '\ESC' -> do
-                 keysRef $= []
-                 _appEditor app $~ Editor.escapeEdit
-                 GLUT.postRedisplay Nothing
-              '\r' -> do
-                 -- When RETURN is pressed, just place parts
-                 keysRef $= []
-                 _appEditor app $~ Editor.placeParts
-                 GLUT.postRedisplay Nothing
-              '?' -> do
-                 editor <- get (_appEditor app)
-                 let n = length $ concatMap flattenPartTree $ allParts editor
-                 logInfo $ "Number of pieces: " ++ show n
-              _ -> do
-                 keysRef $~ (char :)
-                 keys <- get keysRef
-                 case Command.readCommand (reverse keys) of
-                    Nothing -> return ()
-                    Just cmd -> do
-                       logInfo $ show cmd
-                       App.execCommand app cmd
-                       keysRef $= []
-                       GLUT.postRedisplay Nothing
-           cmdBuf <- get keysRef
-           logInfo $ "Command buffer: " ++ cmdBuf
-     )
+            Char char | keyState == Down -> do
+               case char of
+                  '\b'   -> keysRef $~ drop 1
+                  '\ESC' -> do
+                     keysRef $= []
+                     _appEditor app $~ Editor.escapeEdit
+                     GLUT.postRedisplay Nothing
+                  '\r' -> do
+                     -- When RETURN is pressed, just place parts
+                     keysRef $= []
+                     _appEditor app $~ Editor.placeParts
+                     GLUT.postRedisplay Nothing
+                  '?' -> do
+                     editor <- get (_appEditor app)
+                     let n = length $ concatMap flattenPartTree $ allParts editor
+                     logInfo $ "Number of pieces: " ++ show n
+                  '\SOH' | GLUT.ctrl modifiers == Down -> do
+                     -- X reports character of Ctrl+a as \SOH
+                     _appEditor app $~ Editor.selectAll
+                     GLUT.postRedisplay Nothing
+                  _ -> do
+                     -- When keys are pressed, their characters are accumulated into
+                     -- commands than can be executed.
+                     keysRef $~ (char :)
+                     keys <- get keysRef
+                     case Command.readCommand (reverse keys) of
+                        Nothing -> return ()
+                        Just cmd -> do
+                           logInfo $ show cmd
+                           App.execCommand app cmd
+                           keysRef $= []
+                           GLUT.postRedisplay Nothing
+               cmdBuf <- get keysRef
+               logInfo $ "Command buffer: " ++ cmdBuf
 
-  GLUT.specialCallback $=
-     (Just $ \key mousePos -> do
-           case key of
-              KeyUp    -> _appEditor app $~ Editor.moveSelectedParts (Vector3   0   1  0)
-              KeyDown  -> _appEditor app $~ Editor.moveSelectedParts (Vector3   0 (-1) 0)
-              KeyLeft  -> _appEditor app $~ Editor.moveSelectedParts (Vector3 (-1)  0  0)
-              KeyRight -> _appEditor app $~ Editor.moveSelectedParts (Vector3   1   0  0)
-              otherwise -> return ()
-           GLUT.postRedisplay Nothing
-     )
+            _ -> return ()
+     ) -- end keyboardMouseCallback
 
   GLUT.mainLoop
 
