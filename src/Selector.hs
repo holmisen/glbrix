@@ -18,6 +18,7 @@ module Selector
 
  -- * Operations
  , select
+ , selectAll
  , unselectAll
  )
 where
@@ -46,6 +47,12 @@ unselectAll :: Selector a -> Selector a
 unselectAll s =
    s & nonSelected %~ (view selected s ++)
      & selected .~ []
+
+
+selectAll :: Selector a -> Selector a
+selectAll s =
+   s & selected %~ (view nonSelected s ++)
+     & nonSelected .~ []
 
 
 -- | Selects/unselects part for given index.

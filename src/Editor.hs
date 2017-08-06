@@ -132,6 +132,9 @@ moveParts pos = mapPlace $ \(Place toPlace (Min z) placed) ->
 --------------------------------------------------------------------------------
 -- EDIT MODE FUNCTIONS
 
+selectAll :: Editor -> Editor
+selectAll = mapPick $ \(Pick s) -> Pick (Selector.selectAll s)
+
 unselectAll :: Editor -> Editor
 unselectAll = mapPick $ \(Pick s) -> Pick (Selector.unselectAll s)
 
